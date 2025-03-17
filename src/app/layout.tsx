@@ -2,6 +2,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { InvitationProvider } from "@/lib/contexts/InvitationContext";
 import NavMenu from "@/components/NavMenu";
+import RemoveSignInButton from "@/components/RemoveSignInButton";
 
 export const metadata = {
   title: "CareVoice Assistant",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <AuthProvider>
           <InvitationProvider>
             <NavMenu />
+            <RemoveSignInButton />
             <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
               {children}
             </div>

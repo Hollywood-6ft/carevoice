@@ -32,17 +32,17 @@ body {
   }
 }
 
-/* Hide Google Sign In button in the navbar */
-nav.bg-white.shadow.z-10.fixed.w-full.top-0 button.flex.items-center.justify-center.bg-white.text-gray-700.font-semibold.py-2.px-4.rounded-full.border.border-gray-300 {
+/* Hide Google Sign In button in the navbar - More aggressive approach */
+nav button {
+  position: relative;
+}
+
+/* Target specifically the sign in with Google button by its position */
+nav > div > div > div > .flex.items-center.space-x-4 > button {
   display: none !important;
 }
 
-/* Hide any button with Google sign-in SVG in the navbar */
-nav button:has(svg + :contains('Sign in with Google')) {
-  display: none !important;
-}
-
-/* Hide direct Google Sign In buttons in the navbar */
-nav button.flex.items-center.justify-center.bg-white.text-gray-700 {
+/* Hide based on general class pattern */
+nav .flex.items-center button.flex.items-center.justify-center.rounded-full.border {
   display: none !important;
 }
