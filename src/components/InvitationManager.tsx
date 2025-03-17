@@ -263,9 +263,9 @@ const InvitationManager = () => {
       
       {/* Sent invitations */}
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Invitations You've Sent</h3>
+        <h3 className="text-lg font-medium text-gray-700 mb-3">Invitations You&apos;ve Sent</h3>
         {sentInvitations.length === 0 ? (
-          <p className="text-gray-500 italic">You haven't sent any invitations yet.</p>
+          <p className="text-gray-500 italic">You haven&apos;t sent any invitations yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -332,9 +332,9 @@ const InvitationManager = () => {
       
       {/* Received invitations */}
       <div>
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Invitations You've Received</h3>
+        <h3 className="text-lg font-medium text-gray-700 mb-3">Invitations You&apos;ve Received</h3>
         {receivedInvitations.length === 0 ? (
-          <p className="text-gray-500 italic">You haven't received any invitations yet.</p>
+          <p className="text-gray-500 italic">You haven&apos;t received any invitations yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

@@ -7,11 +7,11 @@ import SignInWithGoogle from '@/components/SignInWithGoogle';
 import { DeepgramProvider } from '@/lib/contexts/DeepgramContext';
 import InvitationManager from '@/components/InvitationManager';
 import SharedBoardsView from '@/components/SharedBoardsView';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useSearchParams } from 'next/navigation';
 
-export default function Home() {
+function HomeContent() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('myBoard');
   const searchParams = useSearchParams();
@@ -103,5 +103,13 @@ export default function Home() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSpinner fullScreen />}>
+      <HomeContent />
+    </Suspense>
   );
 }

@@ -483,7 +483,7 @@ export default function NotesList() {
           <h2 className="text-xl font-semibold">Care No Longer Needed</h2>
           {careNoLongerNeededNotes.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
-              No assessments marked as "Care No longer needed" yet.
+              No assessments marked as &quot;Care No longer needed&quot; yet.
             </div>
           ) : (
             <div className="space-y-3">

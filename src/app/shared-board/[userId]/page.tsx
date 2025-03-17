@@ -229,7 +229,7 @@ export default function SharedBoardPage() {
                 </Link>
               </div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {boardOwner?.displayName || boardOwner?.email?.split('@')[0] || 'User'}'s Board
+                {boardOwner?.displayName || boardOwner?.email?.split('@')[0] || 'User'}&apos;s Board
               </h1>
             </div>
             <div className="inline-block bg-blue-100 text-blue-800 text-sm py-1 px-4 rounded-full">

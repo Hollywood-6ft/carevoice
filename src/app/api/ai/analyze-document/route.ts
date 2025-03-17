@@ -5,12 +5,9 @@ import { writeFile } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-// Disable body parsing, we need the raw body to parse the form data
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// Updated configuration format for Next.js App Router
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Process the form data
 async function processFormData(req: NextRequest) {
@@ -41,6 +38,12 @@ async function processFormData(req: NextRequest) {
     // Get file buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // Check if the file is valid
+    if (!buffer || buffer.length === 0) {
+      clearTimeout(processingTimeout);
+      return { error: 'Invalid file content' };
+    }
 
     // Save file to temporary directory
     const tempDir = os.tmpdir();

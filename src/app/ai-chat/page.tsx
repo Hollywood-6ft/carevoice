@@ -5,11 +5,6 @@ import { useState } from 'react';
 import AiChatModal from '@/components/AiChatModal';
 import { Upload } from 'lucide-react';
 
-export const metadata = {
-  title: 'AI Care Assistant | AI Care Assessor',
-  description: 'Get assistance with care assessments using our AI assistant',
-};
-
 export default function AiChatPage() {
   const [showChat, setShowChat] = useState(true);
   const [initialContext, setInitialContext] = useState('');
