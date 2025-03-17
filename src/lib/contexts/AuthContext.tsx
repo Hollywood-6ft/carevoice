@@ -133,6 +133,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Set auth cookie on successful sign in
       Cookies.set('auth', 'true', { expires: 7 });
+      
+      // Explicitly redirect to home page after successful sign-in
+      router.push('/');
     } catch (error) {
       console.error("Error signing in with Google", error);
       // Make sure to set loading to false if sign-in fails

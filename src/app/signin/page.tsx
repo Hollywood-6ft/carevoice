@@ -11,6 +11,7 @@ export default function SignIn() {
   // Redirect to main page if already authenticated
   useEffect(() => {
     if (user) {
+      console.log('User authenticated, redirecting to home page');
       router.push('/');
     }
   }, [user, router]);
