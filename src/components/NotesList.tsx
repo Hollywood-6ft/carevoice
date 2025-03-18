@@ -307,7 +307,7 @@ export default function NotesList() {
 
             {activeTab === 'careNoLongerNeeded' && careNoLongerNeededNotes.length === 0 && (
               <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
-                No 'care no longer needed' assessments found.
+                No &apos;care no longer needed&apos; assessments found.
               </div>
             )}
 
