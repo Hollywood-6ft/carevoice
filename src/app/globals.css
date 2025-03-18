@@ -38,13 +38,15 @@ body {
   }
 }
 
-/* Add smooth transitions for elements */
+/* Add smooth transitions for elements - using regular CSS instead of @apply to avoid circular dependency */
 button,
 a,
 input,
 textarea,
 .transition-colors {
-  @apply transition-colors duration-200;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
 /* Hide Google Sign In button in the navbar - More aggressive approach */
