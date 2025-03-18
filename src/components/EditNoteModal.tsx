@@ -508,711 +508,663 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
   if (!isOpen) return null;
 
   return (
-    <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 ${isOpen ? 'block' : 'hidden'}`}
-    >
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              <FileText className="inline-block mr-2" size={24} />
-              {modalTitle}
-            </h2>
-            <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-              disabled={isSaving}
-            >
-              <X size={24} />
-            </button>
-          </div>
-          
-          {/* Tab Buttons */}
-          <div className="border-b border-gray-200 mb-6">
-            <nav className="-mb-px flex space-x-6">
-              <button
-                onClick={() => setActiveTab('basic')}
-                className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm 
-                  ${activeTab === 'basic' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                type="button"
-              >
-                Basic Info
-              </button>
-              <button
-                onClick={() => setActiveTab('ramp')}
-                className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm 
-                  ${activeTab === 'ramp' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                type="button"
-              >
-                RAMP Assessment
-              </button>
-              <button
-                onClick={() => setActiveTab('additional')}
-                className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm 
-                  ${activeTab === 'additional' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                type="button"
-              >
-                Additional Info
-              </button>
-            </nav>
-          </div>
-          
-          {/* AI care assistant info box */}
-          <div className="bg-blue-50 p-4 rounded-lg mb-6">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-0.5 text-blue-500">
-                <svg 
-                  className="h-6 w-6" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor" 
-                  strokeWidth={2}
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" 
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">AI Care Assistant</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Chat with our AI assistant for help with assessments, drafting care plans, or answering questions about care guidelines.
-                </p>
-                {!readOnly && (
-                  <div className="mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowAiChat(true)}
-                      className="inline-flex items-center px-3 py-1.5 border border-blue-700 text-xs font-medium rounded text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Open AI Assistant
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handleSave();
-          }}>
-            <div className="space-y-6">
-              {/* Basic Info Tab */}
-              {activeTab === 'basic' && (
-                <div>
-                  {/* Status Selection */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Status
-                    </label>
-                    <div className="flex gap-2">
-                      {statusColors.map((statusOption) => (
-                        <button
-                          key={statusOption.value}
-                          type="button"
-                          onClick={() => {
-                            if (!readOnly) {
-                              setStatus(statusOption.value);
-                              if (category === 'Initial Assessment' && statusOption.value === 'high') {
-                                setShowReminders(true);
-                              }
-                            }
-                          }}
-                          className={`px-3 py-1.5 rounded-md border ${
-                            status === statusOption.value ? 'ring-2 ring-blue-500' : ''
-                          } ${statusOption.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
-                          disabled={readOnly}
-                        >
-                          {statusOption.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Priority Selection */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Priority
-                    </label>
-                    <div className="flex gap-2">
-                      {priorityLevels.map((lvl) => (
-                        <button
-                          key={lvl.value}
-                          type="button"
-                          onClick={() => {
-                            if (!readOnly) {
-                              setPriority(lvl.value);
-                            }
-                          }}
-                          className={`px-3 py-1.5 rounded-md border ${
-                            priority === lvl.value ? 'ring-2 ring-blue-500' : ''
-                          } ${lvl.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
-                          disabled={readOnly}
-                        >
-                          {lvl.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Service User name field */}
-                  <div>
-                    <label htmlFor="service-user" className="block text-sm font-medium text-gray-700 mb-1">
-                      Service User <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      id="service-user"
-                      type="text"
-                      value={serviceUser}
-                      onChange={(e) => {
-                        setServiceUser(e.target.value);
-                        if (e.target.value.trim()) {
-                          setServiceUserError(false);
-                        }
-                      }}
-                      disabled={readOnly}
-                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        serviceUserError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                      placeholder="Enter service user name"
-                    />
-                    {serviceUserError && (
-                      <p className="mt-1 text-sm text-red-600">Service user name is required</p>
-                    )}
-                  </div>
-                  
-                  {/* First Visit Date field */}
-                  <div className="mt-4">
-                    <label htmlFor="first-visit-date" className="block text-sm font-medium text-gray-700 mb-1">
-                      First Visit Date <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      id="first-visit-date"
-                      type="date"
-                      value={firstVisitDate}
-                      onChange={(e) => {
-                        setFirstVisitDate(e.target.value);
-                        if (e.target.value) {
-                          setFirstVisitDateError(false);
-                        }
-                      }}
-                      disabled={readOnly}
-                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        firstVisitDateError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                    />
-                    {firstVisitDateError && (
-                      <p className="mt-1 text-sm text-red-600">First visit date is required</p>
-                    )}
-                  </div>
-                  
-                  {/* Assessor field */}
-                  <div className="mt-4">
-                    <label htmlFor="assessor" className="block text-sm font-medium text-gray-700 mb-1">
-                      Assessor <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      id="assessor"
-                      type="text"
-                      value={assessor}
-                      onChange={(e) => {
-                        setAssessor(e.target.value);
-                        if (e.target.value.trim()) {
-                          setAssessorError(false);
-                        }
-                      }}
-                      disabled={readOnly}
-                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        assessorError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                      placeholder="Enter assessor name"
-                    />
-                    {assessorError && (
-                      <p className="mt-1 text-sm text-red-600">Assessor name is required</p>
-                    )}
-                  </div>
-                  
-                  {/* Category Selection */}
-                  <div className="mt-4">
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                      Category
-                    </label>
-                    <select
-                      id="category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      disabled={readOnly}
-                      className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                    >
-                      {noteCategories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  {/* Initial Assessment Content */}
-                  <div className="mt-4">
-                    <label htmlFor="initial-assessment" className="block text-sm font-medium text-gray-700 mb-1">
-                      Social Worker Initial Assessment
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        id="initial-assessment"
-                        value={initialAssessment}
-                        onChange={(e) => setInitialAssessment(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                        placeholder="Enter assessment details..."
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Assessment Notes */}
-                  <div className="mt-4">
-                    <label htmlFor="assessment-notes" className="block text-sm font-medium text-gray-700 mb-1">
-                      Assessment Notes
-                    </label>
-                    <textarea
-                      id="assessment-notes"
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      disabled={readOnly}
-                      className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                      placeholder="Enter assessment notes..."
-                    />
-                  </div>
-                  
-                  {/* Reminders information - shown when Initial Assessment is marked completed */}
-                  {category === 'Initial Assessment' && status === 'high' && (
-                    <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
-                      <div className="flex items-start">
-                        <Calendar className="text-blue-500 mr-2 mt-0.5" size={18} />
-                        <div>
-                          <h3 className="font-medium text-blue-800">Automatic Reminders</h3>
-                          <p className="text-sm text-blue-700 mb-2">
-                            When you save this completed Initial Assessment, the following follow-up assessments will be automatically scheduled:
-                          </p>
-                          <ul className="text-sm text-blue-700 pl-5 list-disc">
-                            <li>Registered Manager Introduction - in 2 weeks</li>
-                            <li>3-month review - in 3 months</li>
-                            <li>6-month review - in 6 months</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* RAMP Fields Section */}
-              {activeTab === 'ramp' && (
-                <div className="border-t pt-4 mt-2">
-                  <h3 className="text-lg font-medium text-gray-800 mb-4">RAMP Assessment Fields</h3>
-                  
-                  <div className="space-y-4">
-                    {rampFields.map((field) => (
-                      <div key={field.id}>
-                        <div className="flex items-center mb-1">
-                          {editingTitleId === field.id && !readOnly ? (
-                            <input
-                              type="text"
-                              value={field.title}
-                              onChange={(e) => handleRampTitleChange(field.id, e.target.value)}
-                              onBlur={() => setEditingTitleId(null)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  setEditingTitleId(null);
-                                }
-                              }}
-                              autoFocus
-                              className="text-sm font-medium text-gray-700 border border-blue-500 rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
-                            />
-                          ) : (
-                            <label 
-                              htmlFor={field.id} 
-                              className="block text-sm font-medium text-gray-700 flex-grow"
-                              onClick={() => !readOnly && setEditingTitleId(field.id)}
-                            >
-                              {field.title} <span className="text-red-600">*</span>
-                            </label>
-                          )}
-                          {!readOnly && (
-                            <button
-                              type="button"
-                              onClick={() => setEditingTitleId(field.id)}
-                              className="text-blue-600 hover:text-blue-800 ml-2 text-xs"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </div>
-                        <textarea
-                          id={field.id}
-                          value={rampValues[field.id] || ''}
-                          onChange={(e) => handleRampValueChange(field.id, e.target.value)}
-                          disabled={readOnly}
-                          className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${
-                            rampErrors[field.id] ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                          } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                          placeholder={`Enter details for ${field.title}...`}
-                        />
-                        {rampErrors[field.id] && (
-                          <p className="mt-1 text-sm text-red-600">{field.title} is required</p>
-                        )}
-                      </div>
-                    ))}
-                    
-                    {/* Custom RAMP Fields */}
-                    {customRampFields.map((field) => (
-                      <div key={field.id} className="mt-4">
-                        <div className="flex items-center mb-1">
-                          {editingTitleId === field.id && !readOnly ? (
-                            <input
-                              type="text"
-                              value={field.title}
-                              onChange={(e) => handleCustomRampTitleChange(field.id, e.target.value)}
-                              onBlur={() => setEditingTitleId(null)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  setEditingTitleId(null);
-                                }
-                              }}
-                              autoFocus
-                              className="text-sm font-medium text-gray-700 border border-blue-500 rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
-                            />
-                          ) : (
-                            <label 
-                              htmlFor={field.id} 
-                              className="block text-sm font-medium text-gray-700 flex-grow"
-                              onClick={() => !readOnly && setEditingTitleId(field.id)}
-                            >
-                              {field.title}
-                            </label>
-                          )}
-                          {!readOnly && (
-                            <div className="flex space-x-2">
-                              <button
-                                type="button"
-                                onClick={() => setEditingTitleId(field.id)}
-                                className="text-blue-600 hover:text-blue-800 ml-2 text-xs"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => removeCustomRampField(field.id)}
-                                className="text-red-600 hover:text-red-800 ml-2 text-xs"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        <textarea
-                          id={field.id}
-                          value={field.value}
-                          onChange={(e) => handleCustomRampValueChange(field.id, e.target.value)}
-                          disabled={readOnly}
-                          className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                          placeholder={`Enter details for ${field.title}...`}
-                        />
-                      </div>
-                    ))}
-                    
-                    {/* Add New Field Button */}
-                    {!readOnly && (
-                      <div className="pt-4 mt-2">
-                        <button
-                          type="button"
-                          onClick={addCustomRampField}
-                          className="flex items-center justify-center w-full p-2 border border-dashed border-gray-300 rounded-md text-blue-600 hover:text-blue-800 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            className="mr-2"
-                          >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                          </svg>
-                          Add New RAMP Field
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {/* Additional Information Section */}
-              {activeTab === 'additional' && (
-                <div className="border-t pt-4 mt-2">
-                  <h3 className="text-lg font-medium text-gray-800 mb-4">Additional Information</h3>
-                  
-                  <div className="space-y-4">
-                    {/* Access Details */}
-                    <div>
-                      <label htmlFor="access-details" className="block text-sm font-medium text-gray-700 mb-1">
-                        Access Details (Including key Safe)
-                      </label>
-                      <textarea
-                        id="access-details"
-                        value={accessDetails}
-                        onChange={(e) => setAccessDetails(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter access details including key safe information..."
-                      />
-                    </div>
-                    
-                    {/* Medical Background */}
-                    <div>
-                      <label htmlFor="medical-background" className="block text-sm font-medium text-gray-700 mb-1">
-                        Outline Medical Background
-                      </label>
-                      <textarea
-                        id="medical-background"
-                        value={medicalBackground}
-                        onChange={(e) => setMedicalBackground(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter medical background information..."
-                      />
-                    </div>
-                    
-                    {/* Current Medication List */}
-                    <div>
-                      <label htmlFor="medication-list" className="block text-sm font-medium text-gray-700 mb-1">
-                        Current Medication List
-                      </label>
-                      <textarea
-                        id="medication-list"
-                        value={medicationList}
-                        onChange={(e) => setMedicationList(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter current medications..."
-                      />
-                    </div>
-                    
-                    {/* Support Required */}
-                    <div>
-                      <label htmlFor="support-required" className="block text-sm font-medium text-gray-700 mb-1">
-                        Support Required
-                      </label>
-                      <textarea
-                        id="support-required"
-                        value={supportRequired}
-                        onChange={(e) => setSupportRequired(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter details about required support..."
-                      />
-                    </div>
-                    
-                    {/* LPA Health */}
-                    <div>
-                      <label htmlFor="lpa-health" className="block text-sm font-medium text-gray-700 mb-1">
-                        LPA Health
-                      </label>
-                      <textarea
-                        id="lpa-health"
-                        value={lpaHealth}
-                        onChange={(e) => setLpaHealth(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter LPA Health information..."
-                      />
-                    </div>
-                    
-                    {/* LPA Finance */}
-                    <div>
-                      <label htmlFor="lpa-finance" className="block text-sm font-medium text-gray-700 mb-1">
-                        LPA Finance
-                      </label>
-                      <textarea
-                        id="lpa-finance"
-                        value={lpaFinance}
-                        onChange={(e) => setLpaFinance(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter LPA Finance information..."
-                      />
-                    </div>
-                    
-                    {/* Key Worker / Project Manager */}
-                    <div>
-                      <label htmlFor="key-worker" className="block text-sm font-medium text-gray-700 mb-1">
-                        Key Worker/Project Manager
-                      </label>
-                      <textarea
-                        id="key-worker"
-                        value={keyWorker}
-                        onChange={(e) => setKeyWorker(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter Key Worker information..."
-                      />
-                    </div>
-                    
-                    {/* Gender */}
-                    <div>
-                      <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                        Gender
-                      </label>
-                      <input
-                        id="gender"
-                        type="text"
-                        value={gender}
-                        onChange={(e) => setGender(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter gender information"
-                      />
-                    </div>
-                    
-                    {/* Ethnicity */}
-                    <div>
-                      <label htmlFor="ethnicity" className="block text-sm font-medium text-gray-700 mb-1">
-                        Ethnicity
-                      </label>
-                      <input
-                        id="ethnicity"
-                        type="text"
-                        value={ethnicity}
-                        onChange={(e) => setEthnicity(e.target.value)}
-                        disabled={readOnly}
-                        className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'}`}
-                        placeholder="Enter ethnicity information"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Fixed Save Button at the bottom */}
-            {!readOnly && (
-              <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-6 flex justify-between">
-                <DownloadAssessmentPdf 
-                  assessment={{
-                    serviceUser,
-                    firstVisitDate,
-                    assessor,
-                    status,
-                    category,
-                    priority,
-                    ...Object.fromEntries(
-                      rampFields.map(field => [field.id, rampValues[field.id] || ''])
-                    ),
-                    rampFieldTitles: Object.fromEntries(
-                      rampFields
-                        .filter(field => {
-                          const defaultField = defaultRampFields.find(df => df.id === field.id);
-                          return defaultField && field.title !== defaultField.title;
-                        })
-                        .map(field => [field.id, field.title])
-                    ),
-                    customRampFields,
-                    accessDetails,
-                    medicalBackground,
-                    medicationList,
-                    supportRequired,
-                    lpaHealth,
-                    lpaFinance,
-                    keyWorker,
-                    gender,
-                    ethnicity,
-                    initialAssessment,
-                    carePlanApproval
-                  }}
-                />
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 z-50 flex items-center justify-center overflow-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                  <FileText className="mr-2 h-5 w-5 text-blue-500" />
+                  {readOnly ? 'View Assessment' : 'Edit Assessment'}
+                </h2>
                 <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center"
+                  onClick={onClose}
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Assessment'
-                  )}
+                  <X className="h-5 w-5" />
                 </button>
               </div>
-            )}
-            
-            {/* Download PDF button for read-only assessments */}
-            {readOnly && (
-              <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-6 flex justify-end">
-                <DownloadAssessmentPdf 
-                  assessment={{
-                    serviceUser,
-                    firstVisitDate,
-                    assessor,
-                    status,
-                    category,
-                    priority,
-                    ...Object.fromEntries(
-                      rampFields.map(field => [field.id, rampValues[field.id] || ''])
-                    ),
-                    rampFieldTitles: Object.fromEntries(
-                      rampFields
-                        .filter(field => {
-                          const defaultField = defaultRampFields.find(df => df.id === field.id);
-                          return defaultField && field.title !== defaultField.title;
-                        })
-                        .map(field => [field.id, field.title])
-                    ),
-                    customRampFields,
-                    accessDetails,
-                    medicalBackground,
-                    medicationList,
-                    supportRequired,
-                    lpaHealth,
-                    lpaFinance,
-                    keyWorker,
-                    gender,
-                    ethnicity,
-                    initialAssessment,
-                    carePlanApproval
-                  }}
-                />
+
+              {formError && showErrorMessage && (
+                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md flex items-center">
+                  <AlertCircle className="mr-2 h-5 w-5" />
+                  {formError}
+                </div>
+              )}
+
+              <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+                <div className="flex -mb-px">
+                  <button
+                    className={`px-4 py-2 font-medium text-sm focus:outline-none ${
+                      activeTab === 'basic'
+                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                    onClick={() => setActiveTab('basic')}
+                  >
+                    Basic Info
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-medium text-sm focus:outline-none ${
+                      activeTab === 'ramp'
+                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                    onClick={() => setActiveTab('ramp')}
+                  >
+                    RAMP Assessment
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-medium text-sm focus:outline-none ${
+                      activeTab === 'additional'
+                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                    onClick={() => setActiveTab('additional')}
+                  >
+                    Additional Info
+                  </button>
+                </div>
               </div>
-            )}
-          </form>
+
+              {/* AI care assistant info box */}
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg mb-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5 text-blue-500">
+                    <svg 
+                      className="h-6 w-6" 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor" 
+                      strokeWidth={2}
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" 
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">AI Care Assistant</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                      Chat with our AI assistant for help with assessments, drafting care plans, or answering questions about care guidelines.
+                    </p>
+                    {!readOnly && (
+                      <div className="mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAiChat(true)}
+                          className="inline-flex items-center px-3 py-1.5 border border-blue-700 text-xs font-medium rounded text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          Open AI Assistant
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleSave();
+              }}>
+                <div className="space-y-6">
+                  {/* Basic Info Tab */}
+                  {activeTab === 'basic' && (
+                    <div>
+                      {/* Status Selection */}
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Status
+                        </label>
+                        <div className="flex gap-2">
+                          {statusColors.map((statusOption) => (
+                            <button
+                              key={statusOption.value}
+                              type="button"
+                              onClick={() => {
+                                if (!readOnly) {
+                                  setStatus(statusOption.value);
+                                  if (category === 'Initial Assessment' && statusOption.value === 'high') {
+                                    setShowReminders(true);
+                                  }
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-md border ${
+                                status === statusOption.value ? 'ring-2 ring-blue-500' : ''
+                              } ${statusOption.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
+                              disabled={readOnly}
+                            >
+                              {statusOption.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Priority Selection */}
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Priority
+                        </label>
+                        <div className="flex gap-2">
+                          {priorityLevels.map((lvl) => (
+                            <button
+                              key={lvl.value}
+                              type="button"
+                              onClick={() => {
+                                if (!readOnly) {
+                                  setPriority(lvl.value);
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-md border ${
+                                priority === lvl.value ? 'ring-2 ring-blue-500' : ''
+                              } ${lvl.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
+                              disabled={readOnly}
+                            >
+                              {lvl.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Service User name field */}
+                      <div>
+                        <label htmlFor="service-user" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Service User <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                          id="service-user"
+                          type="text"
+                          value={serviceUser}
+                          onChange={(e) => {
+                            setServiceUser(e.target.value);
+                            if (e.target.value.trim()) {
+                              setServiceUserError(false);
+                            }
+                          }}
+                          disabled={readOnly}
+                          className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            serviceUserError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                          } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'dark:bg-gray-700 dark:text-white'}`}
+                          placeholder="Enter service user name"
+                        />
+                        {serviceUserError && (
+                          <p className="mt-1 text-sm text-red-600">Service user name is required</p>
+                        )}
+                      </div>
+                      
+                      {/* First Visit Date field */}
+                      <div className="mt-4">
+                        <label htmlFor="first-visit-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          First Visit Date <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                          id="first-visit-date"
+                          type="date"
+                          value={firstVisitDate}
+                          onChange={(e) => {
+                            setFirstVisitDate(e.target.value);
+                            if (e.target.value) {
+                              setFirstVisitDateError(false);
+                            }
+                          }}
+                          disabled={readOnly}
+                          className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            firstVisitDateError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                          } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'dark:bg-gray-700 dark:text-white'}`}
+                        />
+                        {firstVisitDateError && (
+                          <p className="mt-1 text-sm text-red-600">First visit date is required</p>
+                        )}
+                      </div>
+                      
+                      {/* Assessor field */}
+                      <div className="mt-4">
+                        <label htmlFor="assessor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Assessor <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                          id="assessor"
+                          type="text"
+                          value={assessor}
+                          onChange={(e) => {
+                            setAssessor(e.target.value);
+                            if (e.target.value.trim()) {
+                              setAssessorError(false);
+                            }
+                          }}
+                          disabled={readOnly}
+                          className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            assessorError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                          } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'dark:bg-gray-700 dark:text-white'}`}
+                          placeholder="Enter assessor name"
+                        />
+                        {assessorError && (
+                          <p className="mt-1 text-sm text-red-600">Assessor name is required</p>
+                        )}
+                      </div>
+                      
+                      {/* Category Selection */}
+                      <div className="mt-4">
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Category
+                        </label>
+                        <select
+                          id="category"
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          disabled={readOnly}
+                          className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'dark:bg-gray-700 dark:text-white'}`}
+                        >
+                          {noteCategories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      {/* Initial Assessment Content */}
+                      <div className="mt-4">
+                        <label htmlFor="initial-assessment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Social Worker Initial Assessment
+                        </label>
+                        <div className="relative">
+                          <textarea
+                            id="initial-assessment"
+                            value={initialAssessment}
+                            onChange={(e) => setInitialAssessment(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter assessment details..."
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Assessment Notes */}
+                      <div className="mt-4">
+                        <label htmlFor="assessment-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Assessment Notes
+                        </label>
+                        <textarea
+                          id="assessment-notes"
+                          value={text}
+                          onChange={(e) => setText(e.target.value)}
+                          disabled={readOnly}
+                          className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                          placeholder="Enter assessment notes..."
+                        />
+                      </div>
+                      
+                      {/* Reminders information - shown when Initial Assessment is marked completed */}
+                      {category === 'Initial Assessment' && status === 'high' && (
+                        <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
+                          <div className="flex items-start">
+                            <Calendar className="text-blue-500 mr-2 mt-0.5" size={18} />
+                            <div>
+                              <h3 className="font-medium text-blue-800">Automatic Reminders</h3>
+                              <p className="text-sm text-blue-700 mb-2">
+                                When you save this completed Initial Assessment, the following follow-up assessments will be automatically scheduled:
+                              </p>
+                              <ul className="text-sm text-blue-700 pl-5 list-disc">
+                                <li>Registered Manager Introduction - in 2 weeks</li>
+                                <li>3-month review - in 3 months</li>
+                                <li>6-month review - in 6 months</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* RAMP Fields Section */}
+                  {activeTab === 'ramp' && (
+                    <div className="border-t pt-4 mt-2">
+                      <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">RAMP Assessment Fields</h3>
+                      
+                      <div className="space-y-4">
+                        {rampFields.map((field) => (
+                          <div key={field.id}>
+                            <div className="flex items-center mb-1">
+                              {editingTitleId === field.id && !readOnly ? (
+                                <input
+                                  type="text"
+                                  value={field.title}
+                                  onChange={(e) => handleRampTitleChange(field.id, e.target.value)}
+                                  onBlur={() => setEditingTitleId(null)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      setEditingTitleId(null);
+                                    }
+                                  }}
+                                  autoFocus
+                                  className="text-sm font-medium text-gray-700 dark:text-white border border-blue-500 rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
+                                />
+                              ) : (
+                                <label 
+                                  htmlFor={field.id} 
+                                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 flex-grow"
+                                  onClick={() => !readOnly && setEditingTitleId(field.id)}
+                                >
+                                  {field.title} <span className="text-red-600">*</span>
+                                </label>
+                              )}
+                              {!readOnly && (
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingTitleId(field.id)}
+                                  className="text-blue-600 hover:text-blue-800 ml-2 text-xs"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                            </div>
+                            <textarea
+                              id={field.id}
+                              value={rampValues[field.id] || ''}
+                              onChange={(e) => handleRampValueChange(field.id, e.target.value)}
+                              disabled={readOnly}
+                              className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${
+                                rampErrors[field.id] ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                              } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'dark:bg-gray-700 dark:text-white'}`}
+                              placeholder={`Enter details for ${field.title}...`}
+                            />
+                            {rampErrors[field.id] && (
+                              <p className="mt-1 text-sm text-red-600">{field.title} is required</p>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {/* Custom RAMP Fields */}
+                        {customRampFields.map((field) => (
+                          <div key={field.id} className="mt-4">
+                            <div className="flex items-center mb-1">
+                              {editingTitleId === field.id && !readOnly ? (
+                                <input
+                                  type="text"
+                                  value={field.title}
+                                  onChange={(e) => handleCustomRampTitleChange(field.id, e.target.value)}
+                                  onBlur={() => setEditingTitleId(null)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      setEditingTitleId(null);
+                                    }
+                                  }}
+                                  autoFocus
+                                  className="text-sm font-medium text-gray-700 dark:text-white border border-blue-500 rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
+                                />
+                              ) : (
+                                <label 
+                                  htmlFor={field.id} 
+                                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 flex-grow"
+                                  onClick={() => !readOnly && setEditingTitleId(field.id)}
+                                >
+                                  {field.title}
+                                </label>
+                              )}
+                              {!readOnly && (
+                                <div className="flex space-x-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingTitleId(field.id)}
+                                    className="text-blue-600 hover:text-blue-800 ml-2 text-xs"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeCustomRampField(field.id)}
+                                    className="text-red-600 hover:text-red-800 ml-2 text-xs"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            <textarea
+                              id={field.id}
+                              value={field.value}
+                              onChange={(e) => handleCustomRampValueChange(field.id, e.target.value)}
+                              disabled={readOnly}
+                              className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'dark:bg-gray-700 dark:text-white'}`}
+                              placeholder={`Enter details for ${field.title}...`}
+                            />
+                          </div>
+                        ))}
+                        
+                        {/* Add New Field Button */}
+                        {!readOnly && (
+                          <div className="pt-4 mt-2">
+                            <button
+                              type="button"
+                              onClick={addCustomRampField}
+                              className="flex items-center justify-center w-full p-2 border border-dashed border-gray-300 rounded-md text-blue-600 hover:text-blue-800 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                className="mr-2"
+                              >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                              </svg>
+                              Add New RAMP Field
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Additional Information Section */}
+                  {activeTab === 'additional' && (
+                    <div className="border-t pt-4 mt-2">
+                      <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Additional Information</h3>
+                      
+                      <div className="space-y-4">
+                        {/* Access Details */}
+                        <div>
+                          <label htmlFor="access-details" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Access Details (Including key Safe)
+                          </label>
+                          <textarea
+                            id="access-details"
+                            value={accessDetails}
+                            onChange={(e) => setAccessDetails(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter access details including key safe information..."
+                          />
+                        </div>
+                        
+                        {/* Medical Background */}
+                        <div>
+                          <label htmlFor="medical-background" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Outline Medical Background
+                          </label>
+                          <textarea
+                            id="medical-background"
+                            value={medicalBackground}
+                            onChange={(e) => setMedicalBackground(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter medical background information..."
+                          />
+                        </div>
+                        
+                        {/* Current Medication List */}
+                        <div>
+                          <label htmlFor="medication-list" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Current Medication List
+                          </label>
+                          <textarea
+                            id="medication-list"
+                            value={medicationList}
+                            onChange={(e) => setMedicationList(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter current medications..."
+                          />
+                        </div>
+                        
+                        {/* Support Required */}
+                        <div>
+                          <label htmlFor="support-required" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Support Required
+                          </label>
+                          <textarea
+                            id="support-required"
+                            value={supportRequired}
+                            onChange={(e) => setSupportRequired(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter details about required support..."
+                          />
+                        </div>
+                        
+                        {/* LPA Health */}
+                        <div>
+                          <label htmlFor="lpa-health" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            LPA Health
+                          </label>
+                          <textarea
+                            id="lpa-health"
+                            value={lpaHealth}
+                            onChange={(e) => setLpaHealth(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter LPA Health information..."
+                          />
+                        </div>
+                        
+                        {/* LPA Finance */}
+                        <div>
+                          <label htmlFor="lpa-finance" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            LPA Finance
+                          </label>
+                          <textarea
+                            id="lpa-finance"
+                            value={lpaFinance}
+                            onChange={(e) => setLpaFinance(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter LPA Finance information..."
+                          />
+                        </div>
+                        
+                        {/* Key Worker / Project Manager */}
+                        <div>
+                          <label htmlFor="key-worker" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Key Worker/Project Manager
+                          </label>
+                          <textarea
+                            id="key-worker"
+                            value={keyWorker}
+                            onChange={(e) => setKeyWorker(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter Key Worker information..."
+                          />
+                        </div>
+                        
+                        {/* Gender */}
+                        <div>
+                          <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Gender
+                          </label>
+                          <input
+                            id="gender"
+                            type="text"
+                            value={gender}
+                            onChange={(e) => setGender(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter gender information"
+                          />
+                        </div>
+                        
+                        {/* Ethnicity */}
+                        <div>
+                          <label htmlFor="ethnicity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Ethnicity
+                          </label>
+                          <input
+                            id="ethnicity"
+                            type="text"
+                            value={ethnicity}
+                            onChange={(e) => setEthnicity(e.target.value)}
+                            disabled={readOnly}
+                            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`}
+                            placeholder="Enter ethnicity information"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Footer buttons */}
+                <div className="mt-8 flex justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Cancel
+                  </button>
+                  <div className="flex space-x-3">
+                    {!readOnly && (
+                      <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center space-x-2"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="-ml-1 mr-2 h-4 w-4" />
+                            <span>Save Assessment</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                    <DownloadAssessmentPdf note={note} />
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-      </div>
-      
+      )}
+
       {/* AI Chat Modal */}
       {showAiChat && (
-        <AiChatModal
-          isOpen={showAiChat}
-          onClose={() => setShowAiChat(false)}
-          onApplySuggestion={handleAiSuggestion}
-          initialContext={`I'm completing a care assessment for client "${serviceUser || '[Not specified]'}" and could use some assistance. ${initialAssessment ? `\n\nCurrent assessment details: ${initialAssessment}` : ''}`}
+        <AiChatModal 
+          isOpen={showAiChat} 
+          onClose={() => setShowAiChat(false)} 
+          onSuggestion={handleAiSuggestion}
+          context={{
+            status,
+            category,
+            serviceUser,
+            initialAssessment
+          }}
         />
       )}
-    </div>
+    </>
   );
 } 
