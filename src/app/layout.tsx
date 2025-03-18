@@ -4,6 +4,7 @@ import { InvitationProvider } from "@/lib/contexts/InvitationContext";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import NavMenu from "@/components/NavMenu";
 import RemoveSignInButton from "@/components/RemoveSignInButton";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "CareVoice Assistant",
@@ -26,6 +27,7 @@ export default function RootLayout({
               <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
                 {children}
               </div>
+              <Analytics />
             </InvitationProvider>
           </AuthProvider>
         </ThemeProvider>
