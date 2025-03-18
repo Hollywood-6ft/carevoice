@@ -25,6 +25,8 @@ html {
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-start-rgb));
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Dark mode specific styles */
@@ -47,6 +49,51 @@ textarea,
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  
+  /* Ensure consistent text sizes in mobile UI */
+  .text-sm {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+  
+  .text-base {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  
+  .text-lg {
+    font-size: 1.125rem !important;
+    line-height: 1.75rem !important;
+  }
+  
+  .text-xl {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+  
+  /* Improve touch targets for mobile */
+  button, 
+  a, 
+  [role="button"] {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Ensure proper spacing in card elements */
+  .card, 
+  .bg-white.rounded-lg, 
+  .bg-gray-100.rounded-lg,
+  .dark\:bg-gray-800.rounded-lg {
+    padding: 1rem !important;
+  }
 }
 
 /* Hide Google Sign In button in the navbar - More aggressive approach */

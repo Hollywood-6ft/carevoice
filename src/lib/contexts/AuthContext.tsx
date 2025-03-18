@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [isNewSignIn, setIsNewSignIn] = useState(false);
 
   // Check for authentication cookie for an initial quick check
   useEffect(() => {
@@ -34,6 +35,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     // If there is a cookie, we'll still wait for Firebase auth to confirm
   }, []);
+
+  // Effect to handle redirect after authentication
+  useEffect(() => {
+    // If we have a user and this is a new sign-in, redirect to home
+    if (user && isNewSignIn) {
+      console.log('Redirecting to home page after new sign-in');
+      router.push('/');
+      setIsNewSignIn(false);
+    }
+  }, [user, isNewSignIn, router]);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -134,8 +145,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set auth cookie on successful sign in
       Cookies.set('auth', 'true', { expires: 7 });
       
-      // Explicitly redirect to home page after successful sign-in
-      router.push('/');
+      // Flag this as a new sign-in to trigger the redirect in the useEffect
+      setIsNewSignIn(true);
+      
+      // Also try to redirect here, but the useEffect will be our backup
+      try {
+        router.push('/');
+      } catch (error) {
+        console.error("Error redirecting after sign-in:", error);
+      }
     } catch (error) {
       console.error("Error signing in with Google", error);
       // Make sure to set loading to false if sign-in fails
