@@ -7,6 +7,15 @@ To create a new project, you go to `/paths`, choose from our list of Paths, and 
 
 You can also edit the Path's prompt template to be whatever you like!
 
+## Features
+
+### Dark Mode
+The app includes an automatic dark mode that detects your system preferences:
+- Automatically switches between light and dark mode based on your device settings
+- Manual toggle available in the navigation bar
+- Remembers your preference using local storage
+- Smooth transitions between modes
+
 ## Technologies used
 This doesn't really matter, but is useful for the AI to understand more about this project. We are using the following technologies
 - React with Next.js 14 App Router

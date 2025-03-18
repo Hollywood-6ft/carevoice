@@ -16,20 +16,35 @@
   }
 }
 
+/* Apply smooth transitions for dark mode changes */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Base body styles */
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: rgb(var(--background-start-rgb));
+}
+
+/* Dark mode specific styles */
+.dark body {
+  @apply bg-gray-900 text-gray-100;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Add smooth transitions for elements */
+button,
+a,
+input,
+textarea,
+.transition-colors {
+  @apply transition-colors duration-200;
 }
 
 /* Hide Google Sign In button in the navbar - More aggressive approach */
