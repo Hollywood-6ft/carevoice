@@ -95,42 +95,11 @@ textarea,
     padding: 1rem !important;
   }
   
-  /* Consistent font size for Status, Priority and Action buttons on mobile */
-  /* Status buttons in the assessment form */
-  [class*="bg-amber-200"],
-  [class*="bg-green-200"],
-  [class*="bg-red-200"],
-  [class*="bg-gray-200"],
-  [class*="bg-yellow-200"],
-  /* Target action buttons by their common parent with flex and border-t */
+  /* Consistent font size for action buttons on mobile */
   .border-t.pt-4 button {
     font-size: 1rem !important;
     font-weight: 500 !important;
     line-height: 1.5rem !important;
-  }
-  
-  /* More specific selectors for Status, Priority, and action buttons */
-  .bg-amber-200, .bg-amber-800,
-  .bg-green-200, .bg-green-800,
-  .bg-red-200, .bg-red-800,
-  .bg-gray-200, .bg-gray-700,
-  .bg-yellow-200, .bg-yellow-700,
-  .bg-red-200, .bg-red-700 {
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-  }
-  
-  /* Target the specific buttons from the screenshot */
-  button[onClick*="setStatus"],
-  button[onClick*="setPriority"] {
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-  }
-  
-  /* Action buttons at the bottom of the assessment form */
-  button:nth-last-of-type(-n+3) {
-    font-size: 1rem !important;
-    font-weight: 500 !important;
   }
   
   /* Target specific button text for the action buttons */
@@ -138,25 +107,6 @@ textarea,
   button svg ~ span {
     font-size: 1rem !important;
     font-weight: 500 !important; 
-  }
-  
-  /* Specific selectors for the buttons in the screenshot */
-  /* Status selection in assessment form */
-  .text-amber-700, .dark\:text-amber-200,
-  .text-green-700, .dark\:text-green-200,
-  .text-red-700, .dark\:text-red-200 {
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    line-height: 1.5rem !important;
-  }
-  
-  /* Priority selection in assessment form */
-  .text-gray-700, .dark\:text-gray-300,
-  .text-yellow-700, .dark\:text-yellow-300,
-  .text-red-700, .dark\:text-red-300 {
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    line-height: 1.5rem !important;
   }
   
   /* The Cancel, Save Assessment, Download PDF buttons */
@@ -168,17 +118,17 @@ textarea,
     line-height: 1.5rem !important;
   }
   
-  /* Make all Status and Priority buttons stack vertically on mobile */
-  div.mb-6 > div.flex.gap-2,
-  label + div.flex.gap-2 {
+  /* Make all Status and Priority buttons stack vertically on mobile ONLY in the edit modal */
+  .fixed.inset-0.bg-black.bg-opacity-50 div.mb-6 > div.flex.gap-2,
+  .fixed.inset-0.bg-black.bg-opacity-50 label + div.flex.gap-2 {
     flex-direction: column !important;
     gap: 0.5rem !important;
     width: 100% !important;
   }
   
-  /* Ensure Status and Priority buttons take full width on mobile */
-  div.mb-6 > div.flex.gap-2 > button,
-  label + div.flex.gap-2 > button {
+  /* Ensure Status and Priority buttons take full width on mobile ONLY in the edit modal */
+  .fixed.inset-0.bg-black.bg-opacity-50 div.mb-6 > div.flex.gap-2 > button,
+  .fixed.inset-0.bg-black.bg-opacity-50 label + div.flex.gap-2 > button {
     width: 100% !important;
     justify-content: center !important;
     white-space: nowrap !important;
@@ -190,18 +140,32 @@ textarea,
     font-size: 1rem !important;
   }
   
-  /* Target Status buttons specifically - remove the :contains pseudo-selector */
-  #status-container > div.flex.gap-2,
-  [id^="status"] + div.flex.gap-2 {
+  /* Target Status buttons specifically in the edit modal */
+  .fixed.inset-0.bg-black.bg-opacity-50 #status-container > div.flex.gap-2,
+  .fixed.inset-0.bg-black.bg-opacity-50 [id^="status"] + div.flex.gap-2 {
     flex-direction: column !important;
     gap: 0.5rem !important;
   }
   
-  /* Target Priority buttons specifically - remove the :contains pseudo-selector */
-  #priority-container > div.flex.gap-2,
-  [id^="priority"] + div.flex.gap-2 {
+  /* Target Priority buttons specifically in the edit modal */
+  .fixed.inset-0.bg-black.bg-opacity-50 #priority-container > div.flex.gap-2,
+  .fixed.inset-0.bg-black.bg-opacity-50 [id^="priority"] + div.flex.gap-2 {
     flex-direction: column !important;
     gap: 0.5rem !important;
+  }
+  
+  /* Revert the status tags in the note cards back to their original size */
+  .p-6.bg-white.dark\:bg-gray-800.rounded-lg span.px-2\.5.py-0\.5.text-xs.font-medium,
+  .border.border-gray-200.dark\:border-gray-700.rounded-lg span.px-2\.5.py-0\.5.text-xs,
+  .border.rounded-lg.p-4.bg-white.dark\:bg-gray-800 span.inline-flex.items-center.px-2.py-0\.5.rounded.text-xs {
+    font-size: 0.75rem !important; /* text-xs size */
+    line-height: normal !important;
+    height: auto !important;
+    min-height: auto !important;
+    font-weight: medium !important;
+    display: inline-flex !important;
+    padding: 0.25rem 0.5rem !important;
+    white-space: nowrap !important;
   }
 }
 
