@@ -1142,7 +1142,47 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                         )}
                       </button>
                     )}
-                    <DownloadAssessmentPdf note={note} />
+                    <DownloadAssessmentPdf assessment={{
+                      serviceUser: note.serviceUser,
+                      firstVisitDate: note.firstVisitDate,
+                      assessor: note.assessor,
+                      status: note.status,
+                      category: note.category,
+                      priority: note.priority,
+                      ramp1: note.ramp1,
+                      ramp2: note.ramp2,
+                      ramp3: note.ramp3,
+                      ramp4: note.ramp4,
+                      ramp5: note.ramp5,
+                      ramp6: note.ramp6,
+                      ramp7: note.ramp7,
+                      ramp8: note.ramp8,
+                      ramp9: note.ramp9,
+                      ramp10: note.ramp10,
+                      ramp11: note.ramp11,
+                      ramp12: note.ramp12,
+                      ramp13: note.ramp13,
+                      ramp14: note.ramp14,
+                      ramp15: note.ramp15,
+                      ramp16: note.ramp16,
+                      ramp17: note.ramp17,
+                      ramp18: note.ramp18,
+                      ramp19: note.ramp19,
+                      ramp20: note.ramp20,
+                      rampFieldTitles: note.rampFieldTitles,
+                      customRampFields: note.customRampFields,
+                      accessDetails: note.accessDetails,
+                      medicalBackground: note.medicalBackground,
+                      medicationList: note.medicationList,
+                      supportRequired: note.supportRequired,
+                      lpaHealth: note.lpaHealth,
+                      lpaFinance: note.lpaFinance,
+                      keyWorker: note.keyWorker,
+                      gender: note.gender,
+                      ethnicity: note.ethnicity,
+                      initialAssessment: note.initialAssessment,
+                      carePlanApproval: note.carePlanApproval
+                    }} />
                   </div>
                 </div>
               </form>
@@ -1156,13 +1196,8 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
         <AiChatModal 
           isOpen={showAiChat} 
           onClose={() => setShowAiChat(false)} 
-          onSuggestion={handleAiSuggestion}
-          context={{
-            status,
-            category,
-            serviceUser,
-            initialAssessment
-          }}
+          onApplySuggestion={handleAiSuggestion}
+          initialContext={`I'm working on a care assessment for ${serviceUser || 'a service user'}. The assessment category is ${category}. ${initialAssessment ? `I have this initial assessment information: ${initialAssessment}` : ''} Please help me draft content for this assessment.`}
         />
       )}
     </>
