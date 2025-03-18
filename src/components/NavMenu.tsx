@@ -81,11 +81,6 @@ export default function NavMenu() {
             </div>
 
             <div className="flex items-center">
-              {/* Theme Toggle - always visible */}
-              <div className="mr-4">
-                <ThemeToggle />
-              </div>
-              
               {/* User Profile / Login Section */}
               <div className="flex items-center">
                 {user ? (
@@ -166,6 +161,12 @@ export default function NavMenu() {
               >
                 Dashboard
               </Link>
+              
+              {/* Theme toggle for mobile */}
+              <div className="py-2.5">
+                <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</p>
+                <ThemeToggle />
+              </div>
               
               {/* Notifications for mobile */}
               {user && (
