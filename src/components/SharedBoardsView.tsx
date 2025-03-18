@@ -159,24 +159,24 @@ const SharedBoardsView = () => {
 
   if (!user) {
     return (
-      <div className="bg-yellow-50 p-4 rounded-lg text-yellow-800">
+      <div className="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg text-yellow-800 dark:text-yellow-200">
         Please sign in to view shared boards.
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">Boards Shared With You</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Boards Shared With You</h2>
       
       {error && (
-        <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4">
+        <div className="bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 p-3 rounded-md mb-4">
           {error}
         </div>
       )}
       
       {acceptedInvitations.length === 0 ? (
-        <p className="text-gray-500 italic">No boards have been shared with you yet.</p>
+        <p className="text-gray-500 dark:text-gray-400 italic">No boards have been shared with you yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {acceptedInvitations.map((invitation) => {
@@ -195,29 +195,29 @@ const SharedBoardsView = () => {
             return (
               <div 
                 key={invitation.id}
-                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow flex flex-col"
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow flex flex-col bg-white dark:bg-gray-800"
               >
                 <div className="flex items-start mb-3">
-                  <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                     {formattedName.charAt(0).toUpperCase()}
                   </div>
                   <div className="overflow-hidden">
-                    <h3 className="font-bold text-lg text-gray-900 truncate">
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">
                       {formattedName}
                     </h3>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                       Shared their board with you
                     </p>
                   </div>
                 </div>
                 
                 <div className="mt-auto">
-                  <p className="text-xs text-gray-500 mb-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     Shared on {new Date(invitation.createdAt).toLocaleDateString()}
                   </p>
                   <Link 
                     href={`/shared-board/${invitation.inviterId}`}
-                    className="inline-block bg-blue-600 text-white text-sm px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors"
+                    className="inline-block bg-blue-600 dark:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-md hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
                   >
                     View Board
                   </Link>

@@ -184,14 +184,14 @@ export default function SharedBoardPage() {
   if (!hasAccess) {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
-        <div className="bg-red-50 p-6 rounded-lg">
-          <h1 className="text-2xl font-bold text-red-800 mb-4">Access Denied</h1>
-          <p className="text-red-700 mb-4">
+        <div className="bg-red-50 dark:bg-red-900/30 p-6 rounded-lg">
+          <h1 className="text-2xl font-bold text-red-800 dark:text-red-200 mb-4">Access Denied</h1>
+          <p className="text-red-700 dark:text-red-300 mb-4">
             {error || 'You do not have permission to view this board.'}
           </p>
           <Link 
             href="/"
-            className="inline-block bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+            className="inline-block bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 dark:hover:bg-red-800 transition-colors"
           >
             Return to Home
           </Link>
@@ -201,7 +201,7 @@ export default function SharedBoardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white pt-8 pb-20">
+    <main className="min-h-screen bg-white dark:bg-gray-900 pt-8 pb-20">
       <div className="container mx-auto px-4">
         <div className="w-full max-w-4xl mx-auto">
           <header className="flex justify-between items-center mb-8">
@@ -209,7 +209,7 @@ export default function SharedBoardPage() {
               <div className="flex items-center gap-2 mb-1">
                 <Link 
                   href="/"
-                  className="text-blue-600 hover:text-blue-800 flex items-center"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center"
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -228,17 +228,17 @@ export default function SharedBoardPage() {
                   Back to My Board
                 </Link>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {boardOwner?.displayName || boardOwner?.email?.split('@')[0] || 'User'}&apos;s Board
               </h1>
             </div>
-            <div className="inline-block bg-blue-100 text-blue-800 text-sm py-1 px-4 rounded-full">
+            <div className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm py-1 px-4 rounded-full">
               Viewing as {accessLevel === 'edit' ? 'Editor' : 'Viewer'}
             </div>
           </header>
           
           {error && (
-            <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4">
+            <div className="bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 p-3 rounded-md mb-4">
               {error}
             </div>
           )}

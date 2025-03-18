@@ -63,16 +63,16 @@ interface Note {
 
 // Status mapping for visual representation
 const statusMapping = {
-  'medium': { label: 'In Progress', icon: '🟠', bgColor: 'bg-amber-200', textColor: 'text-amber-700' },
-  'high': { label: 'Completed', icon: '🟢', bgColor: 'bg-green-200', textColor: 'text-green-700' },
-  'low': { label: 'Care No longer needed', icon: '🔴', bgColor: 'bg-red-200', textColor: 'text-red-700' },
+  'medium': { label: 'In Progress', icon: '🟠', bgColor: 'bg-amber-200 dark:bg-amber-800', textColor: 'text-amber-700 dark:text-amber-200' },
+  'high': { label: 'Completed', icon: '🟢', bgColor: 'bg-green-200 dark:bg-green-800', textColor: 'text-green-700 dark:text-green-200' },
+  'low': { label: 'Care No longer needed', icon: '🔴', bgColor: 'bg-red-200 dark:bg-red-800', textColor: 'text-red-700 dark:text-red-200' },
 };
 
 // Priority styles mapping for visual representation
 const priorityStyles = {
-  low: { color: 'text-gray-600', bgColor: 'bg-gray-100' },
-  medium: { color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
-  high: { color: 'text-red-600', bgColor: 'bg-red-100' },
+  low: { color: 'text-gray-600 dark:text-gray-300', bgColor: 'bg-gray-100 dark:bg-gray-700' },
+  medium: { color: 'text-yellow-600 dark:text-yellow-300', bgColor: 'bg-yellow-100 dark:bg-yellow-700' },
+  high: { color: 'text-red-600 dark:text-red-300', bgColor: 'bg-red-100 dark:bg-red-700' },
 };
 
 interface SharedNotesListProps {
@@ -169,14 +169,14 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
   return (
     <div className="mt-6">
       {/* Tab navigation - styled to match exactly the main page */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('assessments')}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
               ${activeTab === 'assessments' 
-                ? 'border-blue-500 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
           >
             Assessments ({assessmentNotes.length})
           </button>
@@ -184,8 +184,8 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
             onClick={() => setActiveTab('completed')}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
               ${activeTab === 'completed' 
-                ? 'border-blue-500 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
           >
             Completed ({completedNotes.length})
           </button>
@@ -193,8 +193,8 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
             onClick={() => setActiveTab('careNoLongerNeeded')}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
               ${activeTab === 'careNoLongerNeeded' 
-                ? 'border-blue-500 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
           >
             Care No Longer Needed ({careNoLongerNeededNotes.length})
           </button>
@@ -203,24 +203,24 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
 
       {activeTab === 'assessments' && (
         <>
-          <h2 className="text-xl font-semibold mb-3">Assessment Notes</h2>
+          <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Assessment Notes</h2>
           {assessmentNotes.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
               No assessments available.
             </div>
           ) : (
             <div className="space-y-4">
               {assessmentNotes.map((note) => (
-                <div key={note.id} className="border rounded-lg p-4 bg-white">
+                <div key={note.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
                   <div className="flex justify-between">
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                       {format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a')}
                     </div>
                     <div className="flex items-center space-x-2">
                       {onViewNote && (
                         <button 
                           onClick={() => onViewNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                           aria-label="View assessment"
                         >
                           <Eye size={16} />
@@ -229,7 +229,7 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       {canEdit && onEditNote && (
                         <button 
                           onClick={() => onEditNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                           aria-label="Edit assessment"
                         >
                           <Edit2 size={16} />
@@ -241,7 +241,7 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                   {/* Tags row */}
                   <div className="flex flex-wrap gap-2 my-2">
                     {note.category && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200">
                         <ClipboardList size={12} className="mr-1" />
                         {note.category}
                       </span>
@@ -257,14 +257,14 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                     
                   {/* Assessor info */}
                   {note.assessor && (
-                    <div className="flex items-center my-1 text-sm">
-                      <UserCheck size={14} className="text-gray-500 mr-1" />
+                    <div className="flex items-center my-1 text-sm text-gray-700 dark:text-gray-300">
+                      <UserCheck size={14} className="text-gray-500 dark:text-gray-400 mr-1" />
                       <span>Assessor: {note.assessor}</span>
                     </div>
                   )}
                     
                   {/* Content */}
-                  <p className="text-gray-800 mt-2">{note.text}</p>
+                  <p className="text-gray-800 dark:text-gray-200 mt-2">{note.text}</p>
                 </div>
               ))}
             </div>
@@ -274,24 +274,24 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
 
       {activeTab === 'completed' && (
         <>
-          <h2 className="text-xl font-semibold mb-3">Completed Assessments</h2>
+          <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Completed Assessments</h2>
           {completedNotes.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
               No completed assessments available.
             </div>
           ) : (
             <div className="space-y-4">
               {completedNotes.map((note) => (
-                <div key={note.id} className="border rounded-lg p-4 bg-white">
+                <div key={note.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
                   <div className="flex justify-between">
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                       {format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a')}
                     </div>
                     <div className="flex items-center space-x-2">
                       {onViewNote && (
                         <button 
                           onClick={() => onViewNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                           aria-label="View assessment"
                         >
                           <Eye size={16} />
@@ -300,7 +300,7 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       {canEdit && onEditNote && (
                         <button 
                           onClick={() => onEditNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                           aria-label="Edit assessment"
                         >
                           <Edit2 size={16} />
@@ -312,7 +312,7 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                   {/* Tags row */}
                   <div className="flex flex-wrap gap-2 my-2">
                     {note.category && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200">
                         <ClipboardList size={12} className="mr-1" />
                         {note.category}
                       </span>
@@ -325,21 +325,21 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       </span>
                     )}
                     
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-200 text-green-700">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-200">
                       🟢 Completed
                     </span>
                   </div>
                     
                   {/* Assessor info */}
                   {note.assessor && (
-                    <div className="flex items-center my-1 text-sm">
-                      <UserCheck size={14} className="text-gray-500 mr-1" />
+                    <div className="flex items-center my-1 text-sm text-gray-700 dark:text-gray-300">
+                      <UserCheck size={14} className="text-gray-500 dark:text-gray-400 mr-1" />
                       <span>Assessor: {note.assessor}</span>
                     </div>
                   )}
                     
                   {/* Content */}
-                  <p className="text-gray-800 mt-2">{note.text}</p>
+                  <p className="text-gray-800 dark:text-gray-200 mt-2">{note.text}</p>
                 </div>
               ))}
             </div>
@@ -349,24 +349,24 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
 
       {activeTab === 'careNoLongerNeeded' && (
         <>
-          <h2 className="text-xl font-semibold mb-3">Care No Longer Needed</h2>
+          <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Care No Longer Needed</h2>
           {careNoLongerNeededNotes.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
               No assessments marked as &quot;Care No longer needed&quot; available.
             </div>
           ) : (
             <div className="space-y-4">
               {careNoLongerNeededNotes.map((note) => (
-                <div key={note.id} className="border rounded-lg p-4 bg-white">
+                <div key={note.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
                   <div className="flex justify-between">
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                       {format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a')}
                     </div>
                     <div className="flex items-center space-x-2">
                       {onViewNote && (
                         <button 
                           onClick={() => onViewNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                           aria-label="View assessment"
                         >
                           <Eye size={16} />
@@ -375,7 +375,7 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       {canEdit && onEditNote && (
                         <button 
                           onClick={() => onEditNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                           aria-label="Edit assessment"
                         >
                           <Edit2 size={16} />
@@ -387,7 +387,7 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                   {/* Tags row */}
                   <div className="flex flex-wrap gap-2 my-2">
                     {note.category && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200">
                         <ClipboardList size={12} className="mr-1" />
                         {note.category}
                       </span>
@@ -400,21 +400,21 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       </span>
                     )}
                     
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-200 text-red-700">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-200 dark:bg-red-800 text-red-700 dark:text-red-200">
                       🔴 Care No Longer Needed
                     </span>
                   </div>
                     
                   {/* Assessor info */}
                   {note.assessor && (
-                    <div className="flex items-center my-1 text-sm">
-                      <UserCheck size={14} className="text-gray-500 mr-1" />
+                    <div className="flex items-center my-1 text-sm text-gray-700 dark:text-gray-300">
+                      <UserCheck size={14} className="text-gray-500 dark:text-gray-400 mr-1" />
                       <span>Assessor: {note.assessor}</span>
                     </div>
                   )}
                     
                   {/* Content */}
-                  <p className="text-gray-800 mt-2">{note.text}</p>
+                  <p className="text-gray-800 dark:text-gray-200 mt-2">{note.text}</p>
                 </div>
               ))}
             </div>

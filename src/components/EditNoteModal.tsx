@@ -10,9 +10,9 @@ import DownloadAssessmentPdf from './DownloadAssessmentPdf';
 
 // Status colors for note personalization
 const statusColors = [
-  { name: 'In Progress', value: 'medium', color: 'bg-amber-200', textColor: 'text-amber-700' },
-  { name: 'Completed', value: 'high', color: 'bg-green-200', textColor: 'text-green-700' },
-  { name: 'Care No longer needed', value: 'low', color: 'bg-red-200', textColor: 'text-red-700' },
+  { name: 'In Progress', value: 'medium', color: 'bg-amber-200 dark:bg-amber-800', textColor: 'text-amber-700 dark:text-amber-200' },
+  { name: 'Completed', value: 'high', color: 'bg-green-200 dark:bg-green-800', textColor: 'text-green-700 dark:text-green-200' },
+  { name: 'Care No longer needed', value: 'low', color: 'bg-red-200 dark:bg-red-800', textColor: 'text-red-700 dark:text-red-200' },
 ];
 
 // Note categories for assessments
@@ -25,9 +25,9 @@ const noteCategories = [
 
 // Priority levels
 const priorityLevels = [
-  { name: 'Low', value: 'low', color: 'bg-gray-200' },
-  { name: 'Medium', value: 'medium', color: 'bg-yellow-200' },
-  { name: 'High', value: 'high', color: 'bg-red-200' },
+  { name: 'Low', value: 'low', color: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' },
+  { name: 'Medium', value: 'medium', color: 'bg-yellow-200 dark:bg-yellow-700 text-yellow-700 dark:text-yellow-300' },
+  { name: 'High', value: 'high', color: 'bg-red-200 dark:bg-red-700 text-red-700 dark:text-red-300' },
 ];
 
 // Ramp fields with titles
@@ -633,9 +633,9 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                                   }
                                 }
                               }}
-                              className={`px-3 py-1.5 rounded-md border ${
-                                status === statusOption.value ? 'ring-2 ring-blue-500' : ''
-                              } ${statusOption.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
+                              className={`px-3 py-1.5 rounded-md border dark:border-gray-600 ${
+                                status === statusOption.value ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
+                              } ${statusOption.color} ${statusOption.textColor} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
                               disabled={readOnly}
                             >
                               {statusOption.name}
@@ -659,8 +659,8 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                                   setPriority(lvl.value);
                                 }
                               }}
-                              className={`px-3 py-1.5 rounded-md border ${
-                                priority === lvl.value ? 'ring-2 ring-blue-500' : ''
+                              className={`px-3 py-1.5 rounded-md border dark:border-gray-600 ${
+                                priority === lvl.value ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
                               } ${lvl.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
                               disabled={readOnly}
                             >
