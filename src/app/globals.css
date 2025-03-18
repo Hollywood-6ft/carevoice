@@ -94,6 +94,79 @@ textarea,
   .dark\:bg-gray-800.rounded-lg {
     padding: 1rem !important;
   }
+  
+  /* Consistent font size for Status, Priority and Action buttons on mobile */
+  /* Status buttons in the assessment form */
+  [class*="bg-amber-200"],
+  [class*="bg-green-200"],
+  [class*="bg-red-200"],
+  [class*="bg-gray-200"],
+  [class*="bg-yellow-200"],
+  /* Target action buttons by their common parent with flex and border-t */
+  .border-t.pt-4 button {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5rem !important;
+  }
+  
+  /* More specific selectors for Status, Priority, and action buttons */
+  .bg-amber-200, .bg-amber-800,
+  .bg-green-200, .bg-green-800,
+  .bg-red-200, .bg-red-800,
+  .bg-gray-200, .bg-gray-700,
+  .bg-yellow-200, .bg-yellow-700,
+  .bg-red-200, .bg-red-700 {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Target the specific buttons from the screenshot */
+  button[onClick*="setStatus"],
+  button[onClick*="setPriority"] {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Action buttons at the bottom of the assessment form */
+  button:nth-last-of-type(-n+3) {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Target specific button text for the action buttons */
+  button svg + span,
+  button svg ~ span {
+    font-size: 1rem !important;
+    font-weight: 500 !important; 
+  }
+  
+  /* Specific selectors for the buttons in the screenshot */
+  /* Status selection in assessment form */
+  .text-amber-700, .dark\:text-amber-200,
+  .text-green-700, .dark\:text-green-200,
+  .text-red-700, .dark\:text-red-200 {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5rem !important;
+  }
+  
+  /* Priority selection in assessment form */
+  .text-gray-700, .dark\:text-gray-300,
+  .text-yellow-700, .dark\:text-yellow-300,
+  .text-red-700, .dark\:text-red-300 {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5rem !important;
+  }
+  
+  /* The Cancel, Save Assessment, Download PDF buttons */
+  button.bg-white.dark\:bg-gray-800,
+  button.bg-blue-600.dark\:bg-blue-700,
+  button.bg-blue-600.text-white {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5rem !important;
+  }
 }
 
 /* Hide Google Sign In button in the navbar - More aggressive approach */
