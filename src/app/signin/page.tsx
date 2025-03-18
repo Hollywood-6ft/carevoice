@@ -2,11 +2,12 @@
 
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function SignIn() {
   const { user, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Redirect to main page if already authenticated
   useEffect(() => {
@@ -15,6 +16,27 @@ export default function SignIn() {
       router.push('/');
     }
   }, [user, router]);
+  
+  // Force redirect to home if we're at /signin
+  useEffect(() => {
+    if (pathname === '/signin' && typeof window !== 'undefined') {
+      const authCookie = document.cookie.includes('auth=true');
+      if (authCookie) {
+        console.log('Auth cookie detected, redirecting to home page');
+        router.push('/');
+      }
+    }
+  }, [pathname, router]);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      // Immediate redirect attempt
+      router.push('/');
+    } catch (error) {
+      console.error('Error during sign-in:', error);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
@@ -22,17 +44,17 @@ export default function SignIn() {
         <div className="w-full space-y-8 text-center">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 whitespace-nowrap">
-              CareVoice Assistant
+              CareVoice
             </h1>
             <p className="text-gray-600 dark:text-gray-300 text-lg">
-              Your intelligent companion for healthcare documentation and assessments.
+              Your intelligent companion for healthcare documentation.
             </p>
           </div>
 
           <div className="mt-8">
             {/* Google Sign In */}
             <button 
-              onClick={signInWithGoogle} 
+              onClick={handleSignIn} 
               className="w-full h-12 flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-full transition-colors"
             >
               <svg width="20" height="20" viewBox="0 0 18 18" className="mr-3">

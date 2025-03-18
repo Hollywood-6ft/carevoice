@@ -249,12 +249,12 @@ export default function NotesList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Your Assessment Notes</h2>
-        <div>
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 inline-flex">
+        <div className="w-full md:w-auto">
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 flex flex-col md:flex-row w-full">
             <button
-              className={`px-4 py-2 text-sm rounded-md ${
+              className={`px-4 py-2 text-sm rounded-md mb-1 md:mb-0 ${
                 activeTab === 'assessments'
                   ? 'bg-white dark:bg-gray-700 shadow text-gray-800 dark:text-white'
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
@@ -264,7 +264,7 @@ export default function NotesList() {
               Assessments ({notes.length})
             </button>
             <button
-              className={`px-4 py-2 text-sm rounded-md ${
+              className={`px-4 py-2 text-sm rounded-md mb-1 md:mb-0 ${
                 activeTab === 'completed'
                   ? 'bg-white dark:bg-gray-700 shadow text-gray-800 dark:text-white'
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
@@ -319,8 +319,8 @@ export default function NotesList() {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2 flex items-center">
+                      <div className="flex flex-wrap items-center mb-2 gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                           <User className="w-4 h-4 mr-1.5 text-gray-600 dark:text-gray-400" />
                           Service User: {note.serviceUser || "Unnamed Assessment"}
                         </h3>
@@ -329,15 +329,11 @@ export default function NotesList() {
                             {note.category}
                           </span>
                         )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2 mb-3">
                         {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
                           <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
                             {statusMapping[note.status as keyof typeof statusMapping].label}
                           </span>
                         )}
-
                         {note.priority && priorityStyles[note.priority as keyof typeof priorityStyles] && (
                           <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${priorityStyles[note.priority as keyof typeof priorityStyles].bgColor} ${priorityStyles[note.priority as keyof typeof priorityStyles].color}`}>
                             <Flag className="w-3 h-3 mr-1" />
@@ -399,8 +395,8 @@ export default function NotesList() {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2 flex items-center">
+                      <div className="flex flex-wrap items-center mb-2 gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                           <User className="w-4 h-4 mr-1.5 text-gray-600 dark:text-gray-400" />
                           Service User: {note.serviceUser || "Unnamed Assessment"}
                         </h3>
@@ -409,9 +405,6 @@ export default function NotesList() {
                             {note.category}
                           </span>
                         )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2 mb-3">
                         {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
                           <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
                             {statusMapping[note.status as keyof typeof statusMapping].label}
@@ -466,8 +459,8 @@ export default function NotesList() {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2 flex items-center">
+                      <div className="flex flex-wrap items-center mb-2 gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                           <User className="w-4 h-4 mr-1.5 text-gray-600 dark:text-gray-400" />
                           Service User: {note.serviceUser || "Unnamed Assessment"}
                         </h3>
@@ -476,9 +469,6 @@ export default function NotesList() {
                             {note.category}
                           </span>
                         )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2 mb-3">
                         {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
                           <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
                             {statusMapping[note.status as keyof typeof statusMapping].label}

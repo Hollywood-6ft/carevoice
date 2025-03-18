@@ -7,8 +7,8 @@ import RemoveSignInButton from "@/components/RemoveSignInButton";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
-  title: "CareVoice Assistant",
-  description: "Your intelligent companion for healthcare documentation and assessments.",
+  title: "CareVoice",
+  description: "Your intelligent companion for healthcare documentation.",
 };
 
 export default function RootLayout({
