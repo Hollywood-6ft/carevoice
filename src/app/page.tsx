@@ -39,7 +39,7 @@ function HomeContent() {
                 <nav className="-mb-px flex space-x-8">
                   <button
                     onClick={() => setActiveTab('myBoard')}
-                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
+                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-base 
                       ${activeTab === 'myBoard' 
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
@@ -48,7 +48,7 @@ function HomeContent() {
                   </button>
                   <button
                     onClick={() => setActiveTab('sharedWithMe')}
-                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
+                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-base 
                       ${activeTab === 'sharedWithMe' 
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
@@ -57,7 +57,7 @@ function HomeContent() {
                   </button>
                   <button
                     onClick={() => setActiveTab('manageInvitations')}
-                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
+                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-base 
                       ${activeTab === 'manageInvitations' 
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
