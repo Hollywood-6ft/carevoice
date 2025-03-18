@@ -320,8 +320,9 @@ export default function NotesList() {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
-                          {note.serviceUser || "Unnamed Assessment"}
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2 flex items-center">
+                          <User className="w-4 h-4 mr-1.5 text-gray-600 dark:text-gray-400" />
+                          Service User: {note.serviceUser || "Unnamed Assessment"}
                         </h3>
                         {note.category && (
                           <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
@@ -399,8 +400,9 @@ export default function NotesList() {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
-                          {note.serviceUser || "Unnamed Assessment"}
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2 flex items-center">
+                          <User className="w-4 h-4 mr-1.5 text-gray-600 dark:text-gray-400" />
+                          Service User: {note.serviceUser || "Unnamed Assessment"}
                         </h3>
                         {note.category && (
                           <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
@@ -465,8 +467,9 @@ export default function NotesList() {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
-                          {note.serviceUser || "Unnamed Assessment"}
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2 flex items-center">
+                          <User className="w-4 h-4 mr-1.5 text-gray-600 dark:text-gray-400" />
+                          Service User: {note.serviceUser || "Unnamed Assessment"}
                         </h3>
                         {note.category && (
                           <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">

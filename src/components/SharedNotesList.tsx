@@ -238,6 +238,14 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                     </div>
                   </div>
 
+                  {/* Service User name with icon */}
+                  {note.serviceUser && (
+                    <div className="flex items-center mb-2 font-medium text-gray-900 dark:text-white">
+                      <User size={16} className="mr-1.5 text-gray-600 dark:text-gray-400" />
+                      <span>Service User: {note.serviceUser}</span>
+                    </div>
+                  )}
+
                   {/* Tags row */}
                   <div className="flex flex-wrap gap-2 my-2">
                     {note.category && (
@@ -308,6 +316,14 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       )}
                     </div>
                   </div>
+
+                  {/* Service User name with icon */}
+                  {note.serviceUser && (
+                    <div className="flex items-center mb-2 font-medium text-gray-900 dark:text-white">
+                      <User size={16} className="mr-1.5 text-gray-600 dark:text-gray-400" />
+                      <span>Service User: {note.serviceUser}</span>
+                    </div>
+                  )}
 
                   {/* Tags row */}
                   <div className="flex flex-wrap gap-2 my-2">
@@ -383,6 +399,14 @@ export default function SharedNotesList({ notes, canEdit, onEditNote, onViewNote
                       )}
                     </div>
                   </div>
+
+                  {/* Service User name with icon */}
+                  {note.serviceUser && (
+                    <div className="flex items-center mb-2 font-medium text-gray-900 dark:text-white">
+                      <User size={16} className="mr-1.5 text-gray-600 dark:text-gray-400" />
+                      <span>Service User: {note.serviceUser}</span>
+                    </div>
+                  )}
 
                   {/* Tags row */}
                   <div className="flex flex-wrap gap-2 my-2">
