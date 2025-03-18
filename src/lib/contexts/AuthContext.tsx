@@ -148,11 +148,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Flag this as a new sign-in to trigger the redirect in the useEffect
       setIsNewSignIn(true);
       
-      // Also try to redirect here, but the useEffect will be our backup
-      try {
-        router.push('/');
-      } catch (error) {
-        console.error("Error redirecting after sign-in:", error);
+      // Force navigation to homepage using window.location for more reliable redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      } else {
+        // Fallback to router if window is not available
+        try {
+          router.push('/');
+        } catch (error) {
+          console.error("Error redirecting after sign-in:", error);
+        }
       }
     } catch (error) {
       console.error("Error signing in with Google", error);

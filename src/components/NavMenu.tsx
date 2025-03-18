@@ -81,8 +81,8 @@ export default function NavMenu() {
             </div>
 
             <div className="flex items-center">
-              {/* Only show ThemeToggle on desktop, not on mobile */}
-              <div className="hidden md:block mr-4">
+              {/* Theme Toggle - always visible */}
+              <div className="mr-4">
                 <ThemeToggle />
               </div>
               
@@ -104,7 +104,7 @@ export default function NavMenu() {
                       )}
                     </button>
                     
-                    {/* Only show user name and sign out button on desktop */}
+                    {/* User name and sign out button - always visible on desktop */}
                     <div className="hidden md:flex items-center space-x-3">
                       <span className="text-base font-medium text-gray-700 dark:text-gray-300">
                         Hi {getFirstName()}
@@ -116,23 +116,23 @@ export default function NavMenu() {
                         Sign Out
                       </button>
                     </div>
+                    
+                    {/* Mobile menu button - only visible on mobile */}
+                    <button
+                      onClick={toggleMobileMenu}
+                      className="md:hidden ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      aria-label="Toggle mobile menu"
+                    >
+                      {showMobileMenu ? (
+                        <X className="h-6 w-6" />
+                      ) : (
+                        <Menu className="h-6 w-6" />
+                      )}
+                    </button>
                   </div>
                 ) : (
                   <div></div>
                 )}
-                
-                {/* Mobile menu button */}
-                <button
-                  onClick={toggleMobileMenu}
-                  className="ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  aria-label="Toggle mobile menu"
-                >
-                  {showMobileMenu ? (
-                    <X className="h-6 w-6" />
-                  ) : (
-                    <Menu className="h-6 w-6" />
-                  )}
-                </button>
               </div>
             </div>
           </div>
@@ -166,12 +166,6 @@ export default function NavMenu() {
               >
                 Dashboard
               </Link>
-              
-              {/* Theme toggle for mobile */}
-              <div className="py-2.5">
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Theme</p>
-                <ThemeToggle />
-              </div>
               
               {/* Notifications for mobile */}
               {user && (

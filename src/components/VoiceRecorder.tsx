@@ -251,7 +251,12 @@ export default function VoiceRecorder() {
         ) : isRecording ? (
           'Recording assessment... Click to stop'
         ) : (
-          'Click to start recording an assessment'
+          <div className="flex flex-col items-center">
+            <span>Click to start recording an assessment</span>
+            <span className="text-xs text-gray-500 mt-1 md:hidden">
+              This microphone lets you dictate assessment notes using your voice
+            </span>
+          </div>
         )}
       </div>
       

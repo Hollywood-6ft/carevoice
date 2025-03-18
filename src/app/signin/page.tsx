@@ -13,9 +13,10 @@ export default function SignIn() {
   useEffect(() => {
     if (user) {
       console.log('User authenticated, redirecting to home page');
-      router.push('/');
+      // Force hard navigation to root
+      window.location.href = '/';
     }
-  }, [user, router]);
+  }, [user]);
   
   // Force redirect to home if we're at /signin
   useEffect(() => {
@@ -23,16 +24,17 @@ export default function SignIn() {
       const authCookie = document.cookie.includes('auth=true');
       if (authCookie) {
         console.log('Auth cookie detected, redirecting to home page');
-        router.push('/');
+        // Force hard navigation
+        window.location.href = '/';
       }
     }
-  }, [pathname, router]);
+  }, [pathname]);
 
   const handleSignIn = async () => {
     try {
       await signInWithGoogle();
-      // Immediate redirect attempt
-      router.push('/');
+      // Immediate redirect attempt using hard navigation
+      window.location.href = '/';
     } catch (error) {
       console.error('Error during sign-in:', error);
     }
