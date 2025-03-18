@@ -180,7 +180,7 @@ export default function VoiceRecorder() {
   };
   
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center relative z-[5]">
       {/* Main recording button */}
       <div className="relative w-full max-w-md flex flex-col items-center">
         {hasError ? (

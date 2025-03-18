@@ -139,13 +139,13 @@ export default function NavMenu() {
         <>
           {/* Dark overlay behind the menu */}
           <div 
-            className="fixed inset-0 bg-black/50 z-10"
+            className="fixed inset-0 bg-black/50 z-30"
             onClick={() => setShowMobileMenu(false)}
             aria-hidden="true"
           />
           
           {/* Mobile menu content */}
-          <div className="md:hidden fixed top-16 left-0 right-0 z-10 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 pt-3 pb-4 space-y-3">
               {user && (
                 <div className="flex items-center pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">

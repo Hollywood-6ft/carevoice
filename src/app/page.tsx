@@ -71,7 +71,7 @@ function HomeContent() {
           
           {user && activeTab === 'myBoard' && (
             <>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 relative z-[1]">
                 <DeepgramProvider>
                   <VoiceRecorder />
                 </DeepgramProvider>
