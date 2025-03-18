@@ -1137,7 +1137,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                         ) : (
                           <>
                             <CheckCircle className="-ml-1 mr-2 h-4 w-4" />
-                            <span>Save Assessment</span>
+                            <span>Save</span>
                           </>
                         )}
                       </button>
