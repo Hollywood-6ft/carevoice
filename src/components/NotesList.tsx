@@ -317,66 +317,75 @@ export default function NotesList() {
                   key={note.id}
                   className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
                 >
-                  <div className="mb-4">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
-                        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
-                          {statusMapping[note.status as keyof typeof statusMapping].label}
-                        </span>
-                      )}
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                          {note.serviceUser || "Unnamed Assessment"}
+                        </h3>
+                        {note.category && (
+                          <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {note.category}
+                          </span>
+                        )}
+                      </div>
                       
-                      {note.category && (
-                        <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
-                          {note.category}
-                        </span>
-                      )}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
+                            {statusMapping[note.status as keyof typeof statusMapping].label}
+                          </span>
+                        )}
 
-                      {note.priority && priorityStyles[note.priority as keyof typeof priorityStyles] && (
-                        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${priorityStyles[note.priority as keyof typeof priorityStyles].bgColor} ${priorityStyles[note.priority as keyof typeof priorityStyles].color}`}>
-                          <Flag className="w-3 h-3 mr-1" />
-                          {note.priority.charAt(0).toUpperCase() + note.priority.slice(1)} Priority
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                      <span className="font-medium text-gray-900 dark:text-white">Service User: {note.serviceUser || "Unnamed"}</span>
+                        {note.priority && priorityStyles[note.priority as keyof typeof priorityStyles] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${priorityStyles[note.priority as keyof typeof priorityStyles].bgColor} ${priorityStyles[note.priority as keyof typeof priorityStyles].color}`}>
+                            <Flag className="w-3 h-3 mr-1" />
+                            {note.priority.charAt(0).toUpperCase() + note.priority.slice(1)} Priority
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3">
+                        {note.text}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        {note.assessor && (
+                          <div className="flex items-center">
+                            <UserCheck className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                            Assessor: {note.assessor}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                          {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
+                        </div>
+                        
+                        {note.dueDate && (
+                          <div className="flex-shrink-0">
+                            {renderDueDate(note.dueDate)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     
-                    {note.assessor && (
-                      <div className="flex items-center">
-                        <UserCheck className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300">Assessor: {note.assessor}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 text-gray-700 dark:text-gray-300">
-                    {note.text}
-                  </div>
-                  
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <button
-                      onClick={() => handleEditNote(note)}
-                      className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
-                      title="Edit Assessment"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteNote(note.id)}
-                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
-                      title="Delete Assessment"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-start space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                        title="Edit Assessment"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                        title="Delete Assessment"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -387,59 +396,62 @@ export default function NotesList() {
                   key={note.id}
                   className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
                 >
-                  <div className="mb-4">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
-                        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
-                          {statusMapping[note.status as keyof typeof statusMapping].label}
-                        </span>
-                      )}
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                          {note.serviceUser || "Unnamed Assessment"}
+                        </h3>
+                        {note.category && (
+                          <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {note.category}
+                          </span>
+                        )}
+                      </div>
                       
-                      {note.category && (
-                        <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
-                          {note.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                      <span className="font-medium text-gray-900 dark:text-white">Service User: {note.serviceUser || "Unnamed"}</span>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
+                            {statusMapping[note.status as keyof typeof statusMapping].label}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3">
+                        {note.text}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        {note.assessor && (
+                          <div className="flex items-center">
+                            <UserCheck className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                            Assessor: {note.assessor}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                          {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
+                        </div>
+                      </div>
                     </div>
                     
-                    {note.assessor && (
-                      <div className="flex items-center">
-                        <UserCheck className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300">Assessor: {note.assessor}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 text-gray-700 dark:text-gray-300">
-                    {note.text}
-                  </div>
-                  
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <button
-                      onClick={() => handleEditNote(note)}
-                      className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
-                      title="View Assessment"
-                    >
-                      <ClipboardList size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteNote(note.id)}
-                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
-                      title="Delete Assessment"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-start space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                        title="View Assessment"
+                      >
+                        <ClipboardList size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                        title="Delete Assessment"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -450,59 +462,62 @@ export default function NotesList() {
                   key={note.id}
                   className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
                 >
-                  <div className="mb-4">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
-                        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
-                          {statusMapping[note.status as keyof typeof statusMapping].label}
-                        </span>
-                      )}
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                          {note.serviceUser || "Unnamed Assessment"}
+                        </h3>
+                        {note.category && (
+                          <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {note.category}
+                          </span>
+                        )}
+                      </div>
                       
-                      {note.category && (
-                        <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
-                          {note.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                      <span className="font-medium text-gray-900 dark:text-white">Service User: {note.serviceUser || "Unnamed"}</span>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
+                            {statusMapping[note.status as keyof typeof statusMapping].label}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3">
+                        {note.text}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        {note.assessor && (
+                          <div className="flex items-center">
+                            <UserCheck className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                            Assessor: {note.assessor}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                          {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
+                        </div>
+                      </div>
                     </div>
                     
-                    {note.assessor && (
-                      <div className="flex items-center">
-                        <UserCheck className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300">Assessor: {note.assessor}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 text-gray-700 dark:text-gray-300">
-                    {note.text}
-                  </div>
-                  
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <button
-                      onClick={() => handleEditNote(note)}
-                      className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
-                      title="View Assessment"
-                    >
-                      <ClipboardList size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteNote(note.id)}
-                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
-                      title="Delete Assessment"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-start space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                        title="View Assessment"
+                      >
+                        <ClipboardList size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                        title="Delete Assessment"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
