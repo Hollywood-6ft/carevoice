@@ -248,337 +248,293 @@ export default function NotesList() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="border-b border-gray-200">
-        <button
-          className={`px-4 py-2 font-medium text-sm ${
-            activeTab === 'assessments' 
-              ? 'border-b-2 border-blue-500 text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('assessments')}
-        >
-          Assessments ({notes.length})
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm ${
-            activeTab === 'completed' 
-              ? 'border-b-2 border-blue-500 text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('completed')}
-        >
-          Completed ({completedNotes.length})
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm ${
-            activeTab === 'careNoLongerNeeded' 
-              ? 'border-b-2 border-blue-500 text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('careNoLongerNeeded')}
-        >
-          Care No Longer Needed ({careNoLongerNeededNotes.length})
-        </button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Your Assessment Notes</h2>
+        <div>
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 inline-flex">
+            <button
+              className={`px-4 py-2 text-sm rounded-md ${
+                activeTab === 'assessments'
+                  ? 'bg-white dark:bg-gray-700 shadow text-gray-800 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+              }`}
+              onClick={() => setActiveTab('assessments')}
+            >
+              Assessments ({notes.length})
+            </button>
+            <button
+              className={`px-4 py-2 text-sm rounded-md ${
+                activeTab === 'completed'
+                  ? 'bg-white dark:bg-gray-700 shadow text-gray-800 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+              }`}
+              onClick={() => setActiveTab('completed')}
+            >
+              Completed ({completedNotes.length})
+            </button>
+            <button
+              className={`px-4 py-2 text-sm rounded-md ${
+                activeTab === 'careNoLongerNeeded'
+                  ? 'bg-white dark:bg-gray-700 shadow text-gray-800 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+              }`}
+              onClick={() => setActiveTab('careNoLongerNeeded')}
+            >
+              Care No Longer Needed ({careNoLongerNeededNotes.length})
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Loading indicator */}
-      {isLoading && (
-        <div className="flex justify-center my-4">
-          <LoadingSpinner />
-        </div>
-      )}
+      {/* Active tab content */}
+      <div>
+        {isLoading ? (
+          <LoadingSpinner className="py-8" />
+        ) : (
+          <div className="space-y-4">
+            {activeTab === 'assessments' && notes.length === 0 && (
+              <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
+                No assessments found.
+              </div>
+            )}
 
-      {activeTab === 'assessments' && (
-        <>
-          <h2 className="text-xl font-semibold">Your Assessment Notes</h2>
-          {notes.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              No assessments yet. Start recording to create your first assessment note!
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {notes.map((note) => {
-                const noteStatus = note.status || '';
-                const statusDetails = statusMapping[noteStatus as keyof typeof statusMapping];
-                const priorityStyle = note.priority ? priorityStyles[note.priority as keyof typeof priorityStyles] : null;
-                
-                return (
-                  <div 
-                    key={note.id} 
-                    className={`p-4 rounded-lg shadow border hover:shadow-md transition-shadow bg-white`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col">
-                        <div className="text-sm text-gray-500 mb-1">
-                          {format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a')}
-                        </div>
-                        
-                        {/* Display status, assessment type and priority if they exist */}
-                        <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                          {statusDetails && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${statusDetails.bgColor} ${statusDetails.textColor}`}>
-                              {statusDetails.icon} {statusDetails.label}
-                            </span>
-                          )}
-                          
-                          {note.category && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
-                              <ClipboardList size={12} className="mr-1" />
-                              {note.category}
-                            </span>
-                          )}
-                          
-                          {priorityStyle && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${priorityStyle.bgColor} ${priorityStyle.color}`}>
-                              <Flag size={12} className="mr-1" />
-                              {note.priority ? note.priority.charAt(0).toUpperCase() + note.priority.slice(1) : ''} Priority
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => handleEditNote(note)}
-                          className="text-blue-500 hover:text-blue-700"
-                          aria-label="Edit assessment"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="text-red-500 hover:text-red-700"
-                          aria-label="Delete assessment"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Display service user and assessor information */}
-                    <div className="mb-3">
-                      {note.serviceUser && (
-                        <div className="flex items-center mb-1">
-                          <User size={16} className="text-gray-500 mr-2" />
-                          <h3 className="text-lg font-medium">Service User: {note.serviceUser}</h3>
-                        </div>
-                      )}
-                      
-                      {note.assessor && (
-                        <div className="flex items-center">
-                          <UserCheck size={16} className="text-gray-500 mr-2" />
-                          <span className="text-sm text-gray-700">
-                            Assessor: {note.assessor}
+            {activeTab === 'completed' && completedNotes.length === 0 && (
+              <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
+                No completed assessments found.
+              </div>
+            )}
+
+            {activeTab === 'careNoLongerNeeded' && careNoLongerNeededNotes.length === 0 && (
+              <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
+                No 'care no longer needed' assessments found.
+              </div>
+            )}
+
+            {activeTab === 'assessments' &&
+              notes.map((note) => (
+                <div
+                  key={note.id}
+                  className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                          {note.serviceUser || "Unnamed Assessment"}
+                        </h3>
+                        {note.category && (
+                          <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {note.category}
                           </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <p className="text-gray-800">{note.text}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-
-      {activeTab === 'completed' && (
-        <>
-          <h2 className="text-xl font-semibold">Completed Assessments</h2>
-          {completedNotes.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              No completed assessments yet.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {completedNotes.map((note) => {
-                const noteStatus = note.status || '';
-                const statusDetails = statusMapping[noteStatus as keyof typeof statusMapping];
-                const priorityStyle = note.priority ? priorityStyles[note.priority as keyof typeof priorityStyles] : null;
-                
-                return (
-                  <div 
-                    key={note.id} 
-                    className={`p-4 rounded-lg shadow border hover:shadow-md transition-shadow bg-white`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col">
-                        <div className="text-sm text-gray-500 mb-1">
-                          {format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a')}
-                        </div>
-                        
-                        {/* Display status, assessment type and priority if they exist */}
-                        <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                          {statusDetails && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${statusDetails.bgColor} ${statusDetails.textColor}`}>
-                              {statusDetails.icon} {statusDetails.label}
-                            </span>
-                          )}
-                          
-                          {note.category && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
-                              <ClipboardList size={12} className="mr-1" />
-                              {note.category}
-                            </span>
-                          )}
-                          
-                          {priorityStyle && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${priorityStyle.bgColor} ${priorityStyle.color}`}>
-                              <Flag size={12} className="mr-1" />
-                              {note.priority ? note.priority.charAt(0).toUpperCase() + note.priority.slice(1) : ''} Priority
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Service User */}
-                        {note.serviceUser && (
-                          <div className="flex items-center text-sm text-gray-700 mb-1">
-                            <User size={14} className="mr-1 text-gray-400" />
-                            <span className="font-medium">Service User:</span>
-                            <span className="ml-1">{note.serviceUser}</span>
-                          </div>
-                        )}
-                        
-                        {/* Assessor */}
-                        {note.assessor && (
-                          <div className="flex items-center text-sm text-gray-700 mb-1">
-                            <UserCheck size={14} className="mr-1 text-gray-400" />
-                            <span className="font-medium">Assessor:</span>
-                            <span className="ml-1">{note.assessor}</span>
-                          </div>
                         )}
                       </div>
                       
-                      {/* Action buttons */}
-                      <div className="flex space-x-1">
-                        <button 
-                          onClick={() => handleEditNote(note)}
-                          className="p-1 hover:bg-gray-100 rounded-full"
-                          aria-label="Edit note"
-                        >
-                          <Edit2 size={16} className="text-blue-500" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="p-1 hover:bg-gray-100 rounded-full"
-                          aria-label="Delete note"
-                        >
-                          <Trash2 size={16} className="text-red-500" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-800">{note.text}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-
-      {activeTab === 'careNoLongerNeeded' && (
-        <>
-          <h2 className="text-xl font-semibold">Care No Longer Needed</h2>
-          {careNoLongerNeededNotes.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              No assessments marked as &quot;Care No longer needed&quot; yet.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {careNoLongerNeededNotes.map((note) => {
-                const noteStatus = note.status || '';
-                const statusDetails = statusMapping[noteStatus as keyof typeof statusMapping];
-                const priorityStyle = note.priority ? priorityStyles[note.priority as keyof typeof priorityStyles] : null;
-                
-                return (
-                  <div 
-                    key={note.id} 
-                    className={`p-4 rounded-lg shadow border hover:shadow-md transition-shadow bg-white`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col">
-                        <div className="text-sm text-gray-500 mb-1">
-                          {format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a')}
-                        </div>
-                        
-                        {/* Display status, assessment type and priority if they exist */}
-                        <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                          {statusDetails && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${statusDetails.bgColor} ${statusDetails.textColor}`}>
-                              {statusDetails.icon} {statusDetails.label}
-                            </span>
-                          )}
-                          
-                          {note.category && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
-                              <ClipboardList size={12} className="mr-1" />
-                              {note.category}
-                            </span>
-                          )}
-                          
-                          {priorityStyle && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${priorityStyle.bgColor} ${priorityStyle.color}`}>
-                              <Flag size={12} className="mr-1" />
-                              {note.priority ? note.priority.charAt(0).toUpperCase() + note.priority.slice(1) : ''} Priority
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Service User */}
-                        {note.serviceUser && (
-                          <div className="flex items-center text-sm text-gray-700 mb-1">
-                            <User size={14} className="mr-1 text-gray-400" />
-                            <span className="font-medium">Service User:</span>
-                            <span className="ml-1">{note.serviceUser}</span>
-                          </div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
+                            {statusMapping[note.status as keyof typeof statusMapping].label}
+                          </span>
                         )}
                         
-                        {/* Assessor */}
-                        {note.assessor && (
-                          <div className="flex items-center text-sm text-gray-700 mb-1">
-                            <UserCheck size={14} className="mr-1 text-gray-400" />
-                            <span className="font-medium">Assessor:</span>
-                            <span className="ml-1">{note.assessor}</span>
-                          </div>
+                        {note.priority && priorityStyles[note.priority as keyof typeof priorityStyles] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${priorityStyles[note.priority as keyof typeof priorityStyles].bgColor} ${priorityStyles[note.priority as keyof typeof priorityStyles].color}`}>
+                            <Flag className="w-3 h-3 mr-1" />
+                            {note.priority.charAt(0).toUpperCase() + note.priority.slice(1)} Priority
+                          </span>
                         )}
                       </div>
                       
-                      {/* Action buttons */}
-                      <div className="flex space-x-1">
-                        <button 
-                          onClick={() => handleEditNote(note)}
-                          className="p-1 hover:bg-gray-100 rounded-full"
-                          aria-label="Edit note"
-                        >
-                          <Edit2 size={16} className="text-blue-500" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="p-1 hover:bg-gray-100 rounded-full"
-                          aria-label="Delete note"
-                        >
-                          <Trash2 size={16} className="text-red-500" />
-                        </button>
+                      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3">
+                        {note.text}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        {note.assessor && (
+                          <div className="flex items-center">
+                            <UserCheck className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                            Assessor: {note.assessor}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                          {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
+                        </div>
+                        
+                        {note.dueDate && (
+                          <div className="flex-shrink-0">
+                            {renderDueDate(note.dueDate)}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                    <p className="text-gray-800">{note.text}</p>
+                    <div className="flex items-start space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                        title="Edit Assessment"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                        title="Delete Assessment"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
+                </div>
+              ))}
 
-      {selectedNote && (
-        <EditNoteModal 
+            {activeTab === 'completed' &&
+              completedNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                          {note.serviceUser || "Unnamed Assessment"}
+                        </h3>
+                        {note.category && (
+                          <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {note.category}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
+                            {statusMapping[note.status as keyof typeof statusMapping].label}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3">
+                        {note.text}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        {note.assessor && (
+                          <div className="flex items-center">
+                            <UserCheck className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                            Assessor: {note.assessor}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                          {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                        title="View Assessment"
+                      >
+                        <ClipboardList size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                        title="Delete Assessment"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+            {activeTab === 'careNoLongerNeeded' &&
+              careNoLongerNeededNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                          {note.serviceUser || "Unnamed Assessment"}
+                        </h3>
+                        {note.category && (
+                          <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {note.category}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {note.status && statusMapping[note.status as keyof typeof statusMapping] && (
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full flex items-center ${statusMapping[note.status as keyof typeof statusMapping].bgColor} ${statusMapping[note.status as keyof typeof statusMapping].textColor}`}>
+                            {statusMapping[note.status as keyof typeof statusMapping].label}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3">
+                        {note.text}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        {note.assessor && (
+                          <div className="flex items-center">
+                            <UserCheck className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                            Assessor: {note.assessor}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400 dark:text-gray-500" />
+                          {note.timestamp ? format(new Date(note.timestamp), 'MMM d, yyyy - h:mm a') : 'Unknown date'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                        title="View Assessment"
+                      >
+                        <ClipboardList size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                        title="Delete Assessment"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {isEditModalOpen && selectedNote && (
+        <EditNoteModal
           note={selectedNote}
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedNote(null);
+          }}
           onSave={handleNoteUpdated}
+          readOnly={selectedNote.status === 'high' || selectedNote.status === 'low'}
         />
       )}
     </div>
