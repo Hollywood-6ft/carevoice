@@ -1,10 +1,12 @@
-import { Anthropic } from "@anthropic-ai/sdk";
-import { streamText } from "ai";
+import OpenAI from "openai";
+import { StreamingTextResponse } from 'ai';
 
 export const runtime = "edge";
 
+type Role = 'user' | 'assistant' | 'system';
+
 interface Message {
-  role: 'user' | 'assistant' | 'system';
+  role: Role;
   content: string;
 }
 
@@ -34,33 +36,29 @@ When analyzing documents:
 Present your analysis in a structured format that can be easily incorporated into a care assessment form.`;
     }
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY || '',
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || '',
     });
 
-    const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      messages: (messages as Message[]).map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content
-      })),
-      system: systemPrompt,
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-turbo-preview",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        ...(messages as Message[]).map(msg => ({
+          role: msg.role as Role,
+          content: msg.content
+        }))
+      ],
       max_tokens: 4000,
       temperature: 0.7,
+      stream: true
     });
 
-    // Get the response content
-    const content = response.content[0];
-    const responseText = 'text' in content ? content.text : '';
-
-    return new Response(
-      JSON.stringify({ content: responseText }),
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    // Return the streaming response
+    return new StreamingTextResponse(response.toReadableStream());
   } catch (error) {
     console.error('Error calling AI API:', error);
     // Cast error to any type to access status and message properties
