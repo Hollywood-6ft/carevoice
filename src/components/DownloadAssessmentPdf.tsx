@@ -114,7 +114,7 @@ export default function DownloadAssessmentPdf({
         const lines = pdf.splitTextToSize(text, maxWidth);
         
         // Check if adding this text would cross page boundary
-        if (y + (lines.length * lineHeight) > pageHeight - 20) {
+        if (y + (lines.length * lineHeight) > pageHeight - margin) {
           // If so, add a new page and reset y position
           pdf.addPage();
           y = margin + 10;
@@ -141,9 +141,13 @@ export default function DownloadAssessmentPdf({
       };
       
       // Helper function to add field with label and value
-      const addField = (label: string, value: string | undefined, y: number): number => {
-        // Check if near page bottom - leave more space (35mm) to ensure text doesn't get cut off mid-field
-        if (y > pageHeight - 35) {
+      const addField = (label: string, value: string | undefined, y: number, checkPageBreak = true): number => {
+        const estimatedHeight = 20; // Base height for label
+        const valueLines = value ? pdf.splitTextToSize(value, contentWidth).length : 1;
+        const totalEstimatedHeight = estimatedHeight + (valueLines * 5);
+        
+        // Check if near page bottom - leave more space to prevent content splitting
+        if (checkPageBreak && y + totalEstimatedHeight > pageHeight - 35) {
           pdf.addPage();
           y = margin + 10;
         }
@@ -181,87 +185,102 @@ export default function DownloadAssessmentPdf({
       // Add Basic Info section
       yPos = addSectionTitle('Basic Information', yPos);
       
-      // Always include service user
-      yPos = addField('Service User:', assessment.serviceUser || 'Not specified', yPos);
-      yPos = addField('First Visit Date:', assessment.firstVisitDate || 'Not specified', yPos);
-      yPos = addField('Assessor:', assessment.assessor || 'Not specified', yPos);
-      yPos = addField('Status:', assessment.status || 'Not specified', yPos);
-      yPos = addField('Priority:', assessment.priority || 'Not specified', yPos);
-      yPos = addField('Category:', assessment.category || 'Not specified', yPos);
-      
-      // Add Additional Information section - check if we need a page break first
-      if (yPos > pageHeight - 50) {
-        pdf.addPage();
-        yPos = margin + 10;
-      } else {
-        // Add some spacing between sections
-        yPos += 10;
-      }
-      
-      yPos = addSectionTitle('Additional Information', yPos);
-      
-      // Include all additional fields regardless of content
-      yPos = addField('Initial Assessment:', assessment.initialAssessment || 'No data entered', yPos);
-      yPos = addField('Access Details:', assessment.accessDetails || 'No data entered', yPos);
-      yPos = addField('Medical Background:', assessment.medicalBackground || 'No data entered', yPos);
-      yPos = addField('Medication List:', assessment.medicationList || 'No data entered', yPos);
-      yPos = addField('Support Required:', assessment.supportRequired || 'No data entered', yPos);
-      yPos = addField('LPA Health:', assessment.lpaHealth || 'No data entered', yPos);
-      yPos = addField('LPA Finance:', assessment.lpaFinance || 'No data entered', yPos);
-      yPos = addField('Key Worker:', assessment.keyWorker || 'No data entered', yPos);
-      yPos = addField('Gender:', assessment.gender || 'No data entered', yPos);
-      yPos = addField('Ethnicity:', assessment.ethnicity || 'No data entered', yPos);
-      yPos = addField('Care Plan Approval:', assessment.carePlanApproval || 'No data entered', yPos);
-      
-      // Add RAMP Assessment section - check if we need a page break first
-      if (yPos > pageHeight - 50) {
-        pdf.addPage();
-        yPos = margin + 10;
-      } else {
-        // Add some spacing between sections
-        yPos += 10;
-      }
-      
-      yPos = addSectionTitle('RAMP Assessment', yPos);
-      
-      // Process all RAMP fields - include all 20 standard fields
-      for (let i = 1; i <= 20; i++) {
-        const fieldId = `ramp${i}` as keyof typeof assessment;
-        const fieldValue = assessment[fieldId] as string;
-        const fieldTitle = assessment.rampFieldTitles?.[fieldId] || rampDefaultTitles[fieldId] || `RAMP ${i}`;
+      // Group related fields together to prevent page breaks between them
+      const addFieldGroup = (fields: Array<[string, string | undefined]>, y: number): number => {
+        let currentY = y;
+        const totalHeight = fields.reduce((acc, [label, value]) => {
+          const valueLines = value ? pdf.splitTextToSize(value, contentWidth).length : 1;
+          return acc + 20 + (valueLines * 5);
+        }, 0);
         
-        // Check page break before each field if needed - leave at least 35mm to prevent cut-offs
-        if (yPos > pageHeight - 35) {
+        // Check if the entire group needs to start on a new page
+        if (currentY + totalHeight > pageHeight - margin) {
           pdf.addPage();
-          yPos = margin + 10;
+          currentY = margin + 10;
         }
         
-        yPos = addField(fieldTitle + ':', fieldValue || 'No data entered', yPos);
+        // Add each field without individual page break checks
+        fields.forEach(([label, value]) => {
+          currentY = addField(label, value, currentY, false);
+        });
+        
+        return currentY + 5; // Add extra spacing after group
+      };
+      
+      // Group basic information fields
+      yPos = addFieldGroup([
+        ['Service User:', assessment.serviceUser],
+        ['First Visit Date:', assessment.firstVisitDate],
+        ['Assessor:', assessment.assessor],
+        ['Status:', assessment.status],
+        ['Priority:', assessment.priority],
+        ['Category:', assessment.category]
+      ], yPos);
+      
+      // Add some spacing between sections
+      yPos += 10;
+      
+      // Add Additional Information section
+      yPos = addSectionTitle('Additional Information', yPos);
+      
+      // Group additional information fields
+      yPos = addFieldGroup([
+        ['Initial Assessment:', assessment.initialAssessment],
+        ['Access Details:', assessment.accessDetails],
+        ['Medical Background:', assessment.medicalBackground],
+        ['Medication List:', assessment.medicationList],
+        ['Support Required:', assessment.supportRequired]
+      ], yPos);
+      
+      // Group personal information fields
+      yPos = addFieldGroup([
+        ['LPA Health:', assessment.lpaHealth],
+        ['LPA Finance:', assessment.lpaFinance],
+        ['Key Worker:', assessment.keyWorker],
+        ['Gender:', assessment.gender],
+        ['Ethnicity:', assessment.ethnicity],
+        ['Care Plan Approval:', assessment.carePlanApproval]
+      ], yPos);
+      
+      // Add some spacing before RAMP section
+      yPos += 10;
+      
+      // Add RAMP Assessment section
+      yPos = addSectionTitle('RAMP Assessment', yPos);
+      
+      // Group RAMP fields in pairs to save space while maintaining readability
+      for (let i = 1; i <= 20; i += 2) {
+        const field1Id = `ramp${i}` as keyof typeof assessment;
+        const field2Id = `ramp${i + 1}` as keyof typeof assessment;
+        
+        const field1Value = assessment[field1Id] as string;
+        const field2Value = assessment[field2Id] as string;
+        
+        const field1Title = assessment.rampFieldTitles?.[field1Id] || rampDefaultTitles[field1Id] || `RAMP ${i}`;
+        const field2Title = assessment.rampFieldTitles?.[field2Id] || rampDefaultTitles[field2Id] || `RAMP ${i + 1}`;
+        
+        yPos = addFieldGroup([
+          [field1Title + ':', field1Value],
+          [field2Title + ':', field2Value]
+        ], yPos);
       }
       
       // Add custom RAMP fields if any
       if (assessment.customRampFields && assessment.customRampFields.length > 0) {
-        // Check if we need a page break first - leave at least 45mm for the heading and first field
-        if (yPos > pageHeight - 45) {
-          pdf.addPage();
-          yPos = margin + 10;
-        }
+        yPos += 10;
+        yPos = addSectionTitle('Custom RAMP Fields', yPos);
         
-        // Add a subheading for custom fields
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(13);
-        pdf.text('Custom RAMP Fields', margin, yPos);
-        yPos += 8;
-        
-        assessment.customRampFields.forEach(field => {
-          // Check for page break before each field - leave at least 35mm
-          if (yPos > pageHeight - 35) {
-            pdf.addPage();
-            yPos = margin + 10;
-          }
+        // Group custom fields in pairs
+        for (let i = 0; i < assessment.customRampFields.length; i += 2) {
+          const field1 = assessment.customRampFields[i];
+          const field2 = assessment.customRampFields[i + 1];
           
-          yPos = addField(field.title + ':', field.value || 'No data entered', yPos);
-        });
+          const fields: Array<[string, string]> = [];
+          if (field1) fields.push([field1.title + ':', field1.value]);
+          if (field2) fields.push([field2.title + ':', field2.value]);
+          
+          yPos = addFieldGroup(fields, yPos);
+        }
       }
       
       // Add footer with page numbers
