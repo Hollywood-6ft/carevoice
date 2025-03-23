@@ -1,14 +1,19 @@
-import { openai } from "@ai-sdk/openai";
-import { convertToCoreMessages, streamText } from "ai";
+import { Anthropic } from "@anthropic-ai/sdk";
+import { streamText } from "ai";
 
 export const runtime = "edge";
+
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
     // Check if this is a document analysis request
-    const containsDocumentText = messages.some((message: any) => 
+    const containsDocumentText = messages.some((message: Message) => 
       message.role === 'user' && 
       (message.content.includes("I've uploaded a document called") || 
        message.content.includes("I'm uploading a document:"))
@@ -29,16 +34,33 @@ When analyzing documents:
 Present your analysis in a structured format that can be easily incorporated into a care assessment form.`;
     }
 
-    // Use OpenAI instead of Anthropic since we have authentication issues with Anthropic
-    const result = await streamText({
-      model: openai("gpt-4o"),
-      messages: convertToCoreMessages(messages),
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY || '',
+    });
+
+    const response = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      messages: (messages as Message[]).map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      })),
       system: systemPrompt,
-      maxTokens: 4000,
+      max_tokens: 4000,
       temperature: 0.7,
     });
 
-    return result.toDataStreamResponse();
+    // Get the response content
+    const content = response.content[0];
+    const responseText = 'text' in content ? content.text : '';
+
+    return new Response(
+      JSON.stringify({ content: responseText }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error calling AI API:', error);
     // Cast error to any type to access status and message properties
