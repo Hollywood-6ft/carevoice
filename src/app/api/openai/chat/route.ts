@@ -58,6 +58,11 @@ Present your analysis in a structured format that can be easily incorporated int
       stream: true
     });
 
+    // Check if response body is null
+    if (!response.body) {
+      throw new Error('OpenAI response body is null');
+    }
+
     // Return the streaming response
     return new StreamingTextResponse(response.body);
   } catch (error) {
