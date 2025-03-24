@@ -425,7 +425,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
         // Send the hidden message to API - with a clearer prompt to avoid confusion
         await append({
           role: 'user' as const,
-          content: `Analyze this document for a care assessment: ${metadataFromFile}\n\n${truncatedText}`,
+          content: `Extract ALL information from this document exactly as it appears. Do not make assumptions, add interpretations, or leave out any details: ${metadataFromFile}\n\n${truncatedText}`,
         }, { hideFromUI: true });
         
         // Re-enable auto-scrolling after a delay

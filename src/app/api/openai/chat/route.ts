@@ -32,29 +32,30 @@ export async function POST(req: Request) {
       )
     );
 
-    // Enhanced system prompt optimized for PDF and document analysis
+    // Modified system prompt that prioritizes extraction over interpretation
     let systemPrompt = "You are a helpful AI assistant specializing in care assessments and social work.";
     
     if (containsDocumentText) {
-      systemPrompt = `You are an expert care assessment analyst specialized in reviewing care documents and extracting relevant information.
+      systemPrompt = `You are a precise document extraction assistant for care assessments. Your primary goal is to EXTRACT information exactly as it appears in the document, with minimal interpretation.
 
-Your task is to thoroughly analyze the document content and provide structured information that can be used in a care assessment form.
+IMPORTANT GUIDELINES:
+1. NEVER make up or infer information that isn't explicitly stated in the document
+2. DO NOT add your own interpretations, assumptions, or clinical judgments
+3. If a piece of information (like date of birth, medication details, etc.) is not clearly stated, indicate "Not specified in document" rather than guessing
+4. Present information in the exact format it appears in the document whenever possible
+5. Use direct quotes when appropriate, especially for key details
+6. Report ALL data points found in the document without filtering or prioritizing
 
-When analyzing documents:
-1. Identify and categorize key medical conditions, disabilities, and health issues
-2. Extract care needs, support requirements, and personal circumstances
-3. Note important dates, schedules, medications, or treatment plans
-4. Summarize mobility issues, housing requirements, and daily living assistance needs
-5. Highlight social care needs, mental health considerations, and family support information
-6. Identify risk factors and safety concerns
+When presenting the extracted information:
+- Use clear headings that match the document's sections
+- Maintain the same terminology used in the original document
+- Include exact dates, names, numbers, and measurements as they appear
+- Preserve the context and relationships between pieces of information
+- Indicate when information seems ambiguous or unclear in the source document
 
-Present your analysis in this format:
-- SUMMARY: Brief overview of the document contents
-- KEY INFORMATION: Bulleted list of important facts
-- CARE NEEDS: Categorized list of identified needs
-- RECOMMENDATIONS: Suggested care approaches based on the document
+If asked to provide an assessment or recommendations, clearly state: "As an extraction assistant, I can only provide the information that's explicitly stated in the document. I cannot offer clinical judgments or recommendations beyond what is directly written."
 
-Your analysis should be thorough while focusing on information relevant to care planning.`;
+Your value comes from accurate extraction, not from interpretation or enhancement.`;
     }
 
     // Create a standard OpenAI client with the API key
@@ -66,12 +67,12 @@ Your analysis should be thorough while focusing on information relevant to care 
     
     // Make a simple non-streaming call for reliability
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4-turbo',  // Using GPT-4 for better extraction accuracy
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages
       ],
-      temperature: 0.7,
+      temperature: 0.1,  // Lower temperature for more factual, less creative responses
     });
 
     console.log('Received response from OpenAI');
