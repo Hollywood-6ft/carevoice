@@ -1,13 +1,22 @@
-import { StreamingTextResponse } from 'ai';
+import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Edge runtime
-export const runtime = 'edge';
+// Standard Node.js environment for reliability
+export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
+  console.log('OpenAI API called - Debug');
   try {
+    // Check if API key is set
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY not set');
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    }
+
     // Extract the messages from the request
     const { messages } = await req.json();
+    
+    console.log(`Received ${messages.length} messages`);
 
     // Check if this is a document analysis request
     const containsDocumentText = messages.some((message: any) => 
@@ -31,49 +40,35 @@ When analyzing documents:
 Present your analysis in a structured format that can be easily incorporated into a care assessment form.`;
     }
 
-    // Create a standard OpenAI client - works better with Vercel
+    // Create a standard OpenAI client with the API key
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || ""
+      apiKey: process.env.OPENAI_API_KEY
     });
 
-    const response = await openai.chat.completions.create({
+    console.log('Calling OpenAI API');
+    
+    // Make a simple non-streaming call for reliability
+    const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages
       ],
-      stream: true,
+      temperature: 0.7,
     });
 
-    // Create a readable stream manually to avoid type issues
-    const stream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of response) {
-          const text = chunk.choices[0]?.delta?.content || '';
-          if (text) {
-            controller.enqueue(new TextEncoder().encode(text));
-          }
-        }
-        controller.close();
-      },
-    });
+    console.log('Received response from OpenAI');
     
-    // Return the streaming response
-    return new StreamingTextResponse(stream);
+    // Return the response directly
+    return NextResponse.json({ 
+      message: completion.choices[0].message
+    });
     
   } catch (error: any) {
     console.error('OpenAI API Error:', error);
     
-    return new Response(
-      JSON.stringify({
-        error: error?.message || "An error occurred with the OpenAI service",
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return NextResponse.json({
+      error: error?.message || "An error occurred with the OpenAI service",
+    }, { status: 500 });
   }
 }

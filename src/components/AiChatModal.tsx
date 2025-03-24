@@ -23,42 +23,151 @@ interface ExtendedMessage {
 // Modify or extend the useChat hook to handle the hideFromUI option
 // This is a custom implementation since the standard useChat doesn't support this
 const useCustomChat = (initialContext: string = '') => {
-  const chatHook = useChat({
-    api: '/api/anthropic/chat', // Use the chosen API endpoint
-    initialMessages: [
+  const [messages, setMessages] = useState<ExtendedMessage[]>([
+    {
+      id: 'system-message',
+      role: 'system',
+      content: `You are a helpful AI assistant specializing in care assessments and social work. Help the user complete their care assessment by providing information, drafting content, and answering questions about best practices in care assessments. When appropriate, offer to help write sections of the assessment based on the information provided.`,
+      hideFromUI: true
+    },
+    ...(initialContext ? [
       {
-        id: 'system-message',
-        role: 'system' as const,
-        content: `You are a helpful AI assistant specializing in care assessments and social work. Help the user complete their care assessment by providing information, drafting content, and answering questions about best practices in care assessments. When appropriate, offer to help write sections of the assessment based on the information provided.`
-      },
-      ...(initialContext ? [
-        {
-          id: 'initial-context',
-          role: 'user' as const,
-          content: initialContext
-        }
-      ] : [])
-    ],
-  });
+        id: 'initial-context',
+        role: 'user' as const,
+        content: initialContext
+      }
+    ] : [])
+  ]);
+  
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Create a custom version of messages that filters out hideFromUI messages
-  const visibleMessages = chatHook.messages.filter(msg => !(msg as ExtendedMessage).hideFromUI);
+  const visibleMessages = messages.filter(msg => !msg.hideFromUI);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+  
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    
+    // Add user message to chat
+    const userMessage: ExtendedMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/openai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages: messages
+            .filter(msg => !msg.hideFromUI)
+            .concat(userMessage)
+            .map(({ role, content }) => ({ role, content }))
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get response');
+      }
+      
+      const data = await response.json();
+      
+      // Add assistant message from response
+      setMessages(prev => [
+        ...prev, 
+        {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: data.message.content
+        }
+      ]);
+    } catch (err) {
+      console.error('Error in chat:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Custom append function that supports the hideFromUI option
-  const customAppend = async (message: any, options: { hideFromUI?: boolean } = {}) => {
+  const append = async (message: any, options: { hideFromUI?: boolean } = {}) => {
     // Add the hideFromUI flag to the message if specified
-    const messageWithMetadata = options.hideFromUI 
-      ? { ...message, hideFromUI: true }
-      : message;
+    const messageWithMetadata: ExtendedMessage = {
+      id: Date.now().toString(),
+      role: message.role,
+      content: message.content,
+      ...(options.hideFromUI ? { hideFromUI: true } : {})
+    };
     
-    // Call the original append function
-    return chatHook.append(messageWithMetadata);
+    // Add the message to our local state
+    setMessages(prev => [...prev, messageWithMetadata]);
+    
+    // If it's a user message, we need to get a response
+    if (message.role === 'user' && !options.hideFromUI) {
+      setIsLoading(true);
+      
+      try {
+        const response = await fetch('/api/openai/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            messages: [...messages, messageWithMetadata]
+              .filter(msg => !msg.hideFromUI)
+              .map(({ role, content }) => ({ role, content }))
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to get response');
+        }
+        
+        const data = await response.json();
+        
+        // Add assistant message from response
+        setMessages(prev => [
+          ...prev, 
+          {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: data.message.content
+          }
+        ]);
+      } catch (err) {
+        console.error('Error in chat append:', err);
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    return messageWithMetadata;
   };
   
   return {
-    ...chatHook,
     messages: visibleMessages,
-    append: customAppend
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    append
   };
 };
 
