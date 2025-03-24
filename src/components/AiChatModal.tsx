@@ -318,7 +318,6 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
     setAutoScrollDisabled(true);
     
     // Only add a simple message indicating the document is being processed
-    // But don't display any intermediate analysis messages
     const userMessage = {
       role: 'user' as const,
       content: `I've uploaded a document: "${file.name}" for care assessment analysis.`,
@@ -336,14 +335,12 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       setIsUploading(false);
       setUploadError(`Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file.`);
       
-      // Brief delay before showing error message
       setTimeout(() => {
         append({
           role: 'assistant' as const,
           content: `Sorry, I can only process PDF, DOC, DOCX, or TXT files. Please upload a file with one of these formats.`,
         });
         
-        // Re-enable auto-scroll after error message is shown
         setTimeout(() => setAutoScrollDisabled(false), 500);
       }, 500);
       
@@ -357,14 +354,12 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       setIsUploading(false);
       setUploadError(`File size exceeds the 10MB limit.`);
       
-      // Brief delay before showing error message
       setTimeout(() => {
         append({
           role: 'assistant' as const,
           content: `The file you uploaded is too large (maximum size is 10MB). Please upload a smaller file or extract the relevant portion into a smaller document.`,
         });
         
-        // Re-enable auto-scroll after error message is shown
         setTimeout(() => setAutoScrollDisabled(false), 500);
       }, 500);
       
@@ -378,7 +373,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
     formData.append('file', file);
     
     try {
-      // Update stage to extracting text
+      // Update progress indicators
       setUploadStage('extracting');
       setProcessingProgress(30);
       
@@ -388,70 +383,52 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
         body: formData,
       });
       
-      // Set progress to indicate text extraction is complete
       setProcessingProgress(60);
       setUploadStage('analyzing');
       
-      // Parse the response JSON even if there's an error status
       const data = await response.json();
-      
-      // Set progress to indicate we're ready to analyze
       setProcessingProgress(80);
       
-      // Handle API errors
       if (!response.ok) {
         throw new Error(data.error || `Error: ${response.status}`);
       }
       
-      // If the API returned text, proceed with analysis
       if (data.text) {
-        // Check if there are warnings from the server
         const hasWarning = data.warning !== null && data.warning !== undefined;
-        
-        // No intermediate update messages - skip these to avoid confusion
         
         // Truncate very long documents to avoid token limits
         const truncatedText = data.text.length > 12000 
           ? data.text.substring(0, 12000) + "...\n[Content truncated due to length]" 
           : data.text;
         
-        // Add metadata if there were warnings
+        // Metadata for warnings
         const metadataFromFile = hasWarning ? 
           "Note: The system had some difficulty extracting all the text from this document." : "";
         
-        // Set progress complete
         setProcessingProgress(100);
         
-        // Add an interim message to explain the process
-        await append({
-          role: 'assistant' as const,
-          content: `I've received the document "${file.name}" and extracted the text content. I'll now analyze the information from this document.`,
-        });
+        // SKIP adding any interim messages - we'll just process the document directly
         
-        // Send the hidden message to API with the document content
+        // Send document content with direct instruction to extract and summarize in one step
         await append({
           role: 'user' as const,
-          content: `Extract ALL information from this document exactly as it appears. Do not make assumptions, add interpretations, or leave out any details: ${metadataFromFile}\n\n${truncatedText}`,
+          content: `extract_everything\n\n${truncatedText}`,
         }, { hideFromUI: true });
         
-        // Re-enable auto-scrolling after a delay
         setTimeout(() => {
           setAutoScrollDisabled(false);
-        }, 1000);
+        }, 500);
       } else {
-        // Handle the case where text extraction was successful but no text was found
         setTimeout(() => {
           append({
-            role: 'user' as const,
-            content: `The system couldn't extract any text from "${file.name}". Can you help me with creating a care assessment without the document?`,
+            role: 'assistant' as const,
+            content: `I couldn't extract any text from "${file.name}". The file might be password-protected, contain only images, or be corrupted. Please try a different document or describe the key information directly.`,
           });
           
-          // Re-enable auto-scrolling
           setAutoScrollDisabled(false);
         }, 500);
       }
       
-      // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -460,19 +437,12 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       const errorMessage = (error as Error).message || 'Failed to upload document';
       setUploadError(errorMessage);
       
-      // Show error in the chat with guidance after a brief delay
       setTimeout(() => {
         append({
           role: 'assistant' as const,
-          content: `There was an error processing your document: ${errorMessage}. 
-          
-  You could try:
-  - Using a different file format (TXT files usually work best)
-  - Ensuring the document isn't password protected
-  - Describing the key information from the document directly in our conversation`,
+          content: `There was an error processing your document: ${errorMessage}. Please try a different file format or check that the file isn't corrupted.`,
         });
         
-        // Re-enable auto-scrolling
         setAutoScrollDisabled(false);
       }, 500);
     } finally {

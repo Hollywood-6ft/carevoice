@@ -18,7 +18,13 @@ export async function POST(req: Request) {
     
     console.log(`Received ${messages.length} messages`);
 
-    // More comprehensive document detection
+    // Check for direct extraction command
+    const hasExtractionCommand = messages.some((message: any) => 
+      message.role === 'user' && 
+      message.content.startsWith('extract_everything')
+    );
+
+    // General document detection
     const containsDocumentText = messages.some((message: any) => 
       message.role === 'user' && 
       (
@@ -33,10 +39,56 @@ export async function POST(req: Request) {
       )
     );
 
-    // Modified system prompt with special instructions for document extraction
+    // Base system prompt
     let systemPrompt = "You are a helpful AI assistant specializing in care assessments and social work.";
     
-    if (containsDocumentText) {
+    // Document content found - extract document from the last message that contains it
+    let documentContent = "";
+    if (hasExtractionCommand) {
+      const docMessage = messages.find((m: any) => 
+        m.role === 'user' && m.content.startsWith('extract_everything')
+      );
+      
+      if (docMessage) {
+        documentContent = docMessage.content.replace('extract_everything', '').trim();
+        
+        // Replace the extraction command with a cleaner message to not confuse the model
+        const userIdx = messages.findIndex((m: any) => m.content === docMessage.content);
+        if (userIdx !== -1) {
+          messages[userIdx] = {
+            role: 'user',
+            content: "Here's the document content I'd like you to analyze completely. Please extract all key information and organize it clearly."
+          };
+        }
+      }
+    }
+    
+    // Special direct extraction prompt
+    if (hasExtractionCommand) {
+      systemPrompt = `You are an expert care document analyst. You have been provided with the complete text extracted from a care assessment document. 
+
+Your task is to analyze this care document comprehensively and present ALL relevant information in a clear, structured format.
+
+IMPORTANT GUIDELINES:
+1. Extract and organize ALL key information from the document
+2. Use clear headings to organize different sections of information
+3. Present factual information as stated in the document without interpretation
+4. Include names, dates, times, medications, care needs, and other specific details exactly as they appear
+5. Format the information for maximum readability with clear section headings
+6. If information appears to be missing, note this specifically
+
+DO NOT:
+- Say you can't access the document - the text is provided to you directly
+- Ask for additional information - work with what is provided
+- Make up information that isn't in the document
+
+DOCUMENT CONTENT: 
+${documentContent}
+
+Provide a complete, thorough analysis of all information contained in this document.`;
+    }
+    // Standard document extraction prompt when not using direct command
+    else if (containsDocumentText) {
       systemPrompt = `You are a precise document extraction assistant for care assessments. Your primary goal is to EXTRACT information exactly as it appears in the document, with minimal interpretation.
 
 IMPORTANT GUIDELINES:
@@ -55,9 +107,7 @@ When presenting the extracted information:
 - Preserve the context and relationships between pieces of information
 - Indicate when information seems ambiguous or unclear in the source document
 
-When you receive a message about a document being uploaded and the next message contains the document content, treat this as the document that has been uploaded. Do not say you cannot access the file - the content has already been extracted and provided to you.
-
-Your value comes from accurate extraction, not from interpretation or enhancement.`;
+When you receive a message about a document being uploaded and the next message contains the document content, treat this as the document that has been uploaded. Do not say you cannot access the file - the content has already been extracted and provided to you.`;
     }
 
     // Create a standard OpenAI client with the API key
@@ -65,15 +115,17 @@ Your value comes from accurate extraction, not from interpretation or enhancemen
       apiKey: process.env.OPENAI_API_KEY
     });
 
-    console.log('Calling OpenAI API for document analysis or general assistance');
+    console.log('Calling OpenAI API for document analysis');
     
+    // Modified messages array if we're doing direct extraction
+    const apiMessages = hasExtractionCommand 
+      ? [{ role: 'system' as const, content: systemPrompt }] 
+      : [{ role: 'system' as const, content: systemPrompt }, ...messages];
+
     // Make a simple non-streaming call for reliability
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo',  // Using GPT-4 for better extraction accuracy
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages
-      ],
+      messages: apiMessages,
       temperature: 0.1,  // Lower temperature for more factual, less creative responses
     });
 
