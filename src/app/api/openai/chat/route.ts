@@ -1,12 +1,11 @@
 import { StreamingTextResponse } from 'ai';
-import { Configuration, OpenAIApi } from 'openai-edge';
+import OpenAI from 'openai';
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
-const config = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!
 });
-const openai = new OpenAIApi(config);
 
 type Role = 'user' | 'assistant' | 'system';
 
@@ -43,34 +42,37 @@ Present your analysis in a structured format that can be easily incorporated int
 
     // Prepare messages array with proper typing
     const apiMessages = [
-      { role: 'system' as const, content: systemPrompt },
-      ...(messages as Message[]).map(msg => ({
-        role: msg.role as 'user' | 'assistant' | 'system',
-        content: msg.content
-      }))
+      { role: 'system', content: systemPrompt },
+      ...messages
     ];
 
     // Make the API call
-    const response = await openai.createChatCompletion({
-      model: 'gpt-4',
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4-turbo-preview',
       messages: apiMessages,
       temperature: 0.7,
       stream: true
     });
 
-    // Check if response body is null
-    if (!response.body) {
-      throw new Error('OpenAI response body is null');
-    }
+    // Convert the response to a ReadableStream
+    const stream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of response) {
+          const content = chunk.choices[0]?.delta?.content;
+          if (content) {
+            controller.enqueue(new TextEncoder().encode(content));
+          }
+        }
+        controller.close();
+      }
+    });
 
     // Return the streaming response
-    return new StreamingTextResponse(response.body);
+    return new StreamingTextResponse(stream);
   } catch (error) {
     console.error('Error calling AI API:', error);
-    // Cast error to any type to access status and message properties
     const err = error as any;
     
-    // Return appropriate error response
     return new Response(
       JSON.stringify({
         error: err.message || 'An error occurred during your request.',
