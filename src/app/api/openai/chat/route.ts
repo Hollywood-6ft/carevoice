@@ -1,14 +1,8 @@
-import { OpenAIStream, StreamingTextResponse } from 'ai';
-import { Configuration, OpenAIApi } from 'openai-edge';
+import { StreamingTextResponse } from 'ai';
+import OpenAI from 'openai';
 
-// Use edge runtime for better performance
+// Edge runtime
 export const runtime = 'edge';
-
-// Create an OpenAI API client (that's edge-friendly)
-const config = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
-const openai = new OpenAIApi(config);
 
 export async function POST(req: Request) {
   try {
@@ -18,8 +12,8 @@ export async function POST(req: Request) {
     // Check if this is a document analysis request
     const containsDocumentText = messages.some((message: any) => 
       message.role === 'user' && 
-      (message.content.includes("I've uploaded a document called") || 
-       message.content.includes("I'm uploading a document:"))
+      (message.content.includes("I've uploaded a document") || 
+       message.content.includes("document:"))
     );
 
     // Use different system prompts based on the request type
@@ -37,35 +31,42 @@ When analyzing documents:
 Present your analysis in a structured format that can be easily incorporated into a care assessment form.`;
     }
 
-    // Create a properly formatted message array with the system prompt
-    const apiMessages = [
-      { role: 'system', content: systemPrompt },
-      ...messages.map((message: any) => ({
-        role: message.role,
-        content: message.content,
-      })),
-    ];
+    // Create a standard OpenAI client - works better with Vercel
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || ""
+    });
 
-    // Request the completion from the OpenAI API
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: apiMessages,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ],
       stream: true,
     });
 
-    // Convert the response into a friendly text-stream
-    const stream = OpenAIStream(response);
-
-    // Return a StreamingTextResponse, which is a web standard response object
+    // Create a readable stream manually to avoid type issues
+    const stream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of response) {
+          const text = chunk.choices[0]?.delta?.content || '';
+          if (text) {
+            controller.enqueue(new TextEncoder().encode(text));
+          }
+        }
+        controller.close();
+      },
+    });
+    
+    // Return the streaming response
     return new StreamingTextResponse(stream);
     
-  } catch (error) {
-    console.error('Error in OpenAI chat route:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  } catch (error: any) {
+    console.error('OpenAI API Error:', error);
     
     return new Response(
       JSON.stringify({
-        error: errorMessage,
+        error: error?.message || "An error occurred with the OpenAI service",
       }),
       {
         status: 500,
