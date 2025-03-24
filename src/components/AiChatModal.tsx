@@ -326,6 +326,12 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
     
     // Just add the user message to indicate upload, without any AI response yet
     append(userMessage);
+    
+    // Add a processing message to set expectations
+    append({
+      role: 'assistant' as const,
+      content: `I'm extracting and analyzing the text from your document "${file.name}". This may take a moment...`,
+    });
 
     // Add validation for file type and size
     const validFileTypes = ['.pdf', '.doc', '.docx', '.txt'];
