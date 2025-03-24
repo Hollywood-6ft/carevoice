@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
-  console.log('OpenAI API called - Debug');
+  console.log('OpenAI API called for document analysis');
   try {
     // Check if API key is set
     if (!process.env.OPENAI_API_KEY) {
@@ -18,26 +18,43 @@ export async function POST(req: Request) {
     
     console.log(`Received ${messages.length} messages`);
 
-    // Check if this is a document analysis request
+    // More comprehensive document detection
     const containsDocumentText = messages.some((message: any) => 
       message.role === 'user' && 
-      (message.content.includes("I've uploaded a document") || 
-       message.content.includes("document:"))
+      (
+        message.content.includes("I've uploaded a document") || 
+        message.content.includes("document:") ||
+        message.content.includes("Analyze this document") ||
+        message.content.includes(".pdf") ||
+        message.content.includes(".docx") ||
+        message.content.includes(".doc") ||
+        message.content.includes(".txt")
+      )
     );
 
-    // Use different system prompts based on the request type
+    // Enhanced system prompt optimized for PDF and document analysis
     let systemPrompt = "You are a helpful AI assistant specializing in care assessments and social work.";
     
     if (containsDocumentText) {
-      systemPrompt = `You are an expert care assessment analyst specialized in reviewing care documents and extracting relevant information. 
-      
-When analyzing documents:
-1. Focus on identifying key medical conditions, care needs, support requirements, and personal circumstances
-2. Organize your analysis into clear sections for easy reference
-3. Highlight important information that should be included in a care assessment
-4. Suggest recommendations based on the identified needs
+      systemPrompt = `You are an expert care assessment analyst specialized in reviewing care documents and extracting relevant information.
 
-Present your analysis in a structured format that can be easily incorporated into a care assessment form.`;
+Your task is to thoroughly analyze the document content and provide structured information that can be used in a care assessment form.
+
+When analyzing documents:
+1. Identify and categorize key medical conditions, disabilities, and health issues
+2. Extract care needs, support requirements, and personal circumstances
+3. Note important dates, schedules, medications, or treatment plans
+4. Summarize mobility issues, housing requirements, and daily living assistance needs
+5. Highlight social care needs, mental health considerations, and family support information
+6. Identify risk factors and safety concerns
+
+Present your analysis in this format:
+- SUMMARY: Brief overview of the document contents
+- KEY INFORMATION: Bulleted list of important facts
+- CARE NEEDS: Categorized list of identified needs
+- RECOMMENDATIONS: Suggested care approaches based on the document
+
+Your analysis should be thorough while focusing on information relevant to care planning.`;
     }
 
     // Create a standard OpenAI client with the API key
@@ -45,7 +62,7 @@ Present your analysis in a structured format that can be easily incorporated int
       apiKey: process.env.OPENAI_API_KEY
     });
 
-    console.log('Calling OpenAI API');
+    console.log('Calling OpenAI API for document analysis or general assistance');
     
     // Make a simple non-streaming call for reliability
     const completion = await openai.chat.completions.create({
@@ -67,8 +84,15 @@ Present your analysis in a structured format that can be easily incorporated int
   } catch (error: any) {
     console.error('OpenAI API Error:', error);
     
+    // Provide more helpful error information in production
+    const errorMessage = error?.message || "An error occurred with the OpenAI service";
+    const errorDetails = error?.response?.data?.error?.message || error?.stack || "No additional details available";
+    
+    console.error('Error details:', errorDetails);
+    
     return NextResponse.json({
-      error: error?.message || "An error occurred with the OpenAI service",
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
     }, { status: 500 });
   }
 }

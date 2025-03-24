@@ -567,7 +567,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
               {(error || uploadError) && (
                 <div className="absolute bottom-2 left-0 w-full mt-4 px-4">
                   <div className="bg-red-50 p-4 rounded-lg text-red-800 shadow-md">
-                    <p>Error: {error?.message || uploadError || 'Something went wrong'}</p>
+                    <p>Error: {uploadError || error || 'Something went wrong'}</p>
                   </div>
                 </div>
               )}
