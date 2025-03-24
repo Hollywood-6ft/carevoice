@@ -24,6 +24,7 @@ export async function POST(req: Request) {
       (
         message.content.includes("I've uploaded a document") || 
         message.content.includes("document:") ||
+        message.content.includes("Extract ALL information from this document") ||
         message.content.includes("Analyze this document") ||
         message.content.includes(".pdf") ||
         message.content.includes(".docx") ||
@@ -32,19 +33,20 @@ export async function POST(req: Request) {
       )
     );
 
-    // Modified system prompt that prioritizes extraction over interpretation
+    // Modified system prompt with special instructions for document extraction
     let systemPrompt = "You are a helpful AI assistant specializing in care assessments and social work.";
     
     if (containsDocumentText) {
       systemPrompt = `You are a precise document extraction assistant for care assessments. Your primary goal is to EXTRACT information exactly as it appears in the document, with minimal interpretation.
 
 IMPORTANT GUIDELINES:
-1. NEVER make up or infer information that isn't explicitly stated in the document
-2. DO NOT add your own interpretations, assumptions, or clinical judgments
-3. If a piece of information (like date of birth, medication details, etc.) is not clearly stated, indicate "Not specified in document" rather than guessing
-4. Present information in the exact format it appears in the document whenever possible
-5. Use direct quotes when appropriate, especially for key details
-6. Report ALL data points found in the document without filtering or prioritizing
+1. NEVER tell the user you cannot access files directly. The document content is provided directly in the user message that begins with "Extract ALL information..." or contains document text.
+2. NEVER make up or infer information that isn't explicitly stated in the document
+3. DO NOT add your own interpretations, assumptions, or clinical judgments
+4. If a piece of information (like date of birth, medication details, etc.) is not clearly stated, indicate "Not specified in document" rather than guessing
+5. Present information in the exact format it appears in the document whenever possible
+6. Use direct quotes when appropriate, especially for key details
+7. Report ALL data points found in the document without filtering or prioritizing
 
 When presenting the extracted information:
 - Use clear headings that match the document's sections
@@ -53,7 +55,7 @@ When presenting the extracted information:
 - Preserve the context and relationships between pieces of information
 - Indicate when information seems ambiguous or unclear in the source document
 
-If asked to provide an assessment or recommendations, clearly state: "As an extraction assistant, I can only provide the information that's explicitly stated in the document. I cannot offer clinical judgments or recommendations beyond what is directly written."
+When you receive a message about a document being uploaded and the next message contains the document content, treat this as the document that has been uploaded. Do not say you cannot access the file - the content has already been extracted and provided to you.
 
 Your value comes from accurate extraction, not from interpretation or enhancement.`;
     }

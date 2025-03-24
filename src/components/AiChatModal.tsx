@@ -422,7 +422,13 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
         // Set progress complete
         setProcessingProgress(100);
         
-        // Send the hidden message to API - with a clearer prompt to avoid confusion
+        // Add an interim message to explain the process
+        await append({
+          role: 'assistant' as const,
+          content: `I've received the document "${file.name}" and extracted the text content. I'll now analyze the information from this document.`,
+        });
+        
+        // Send the hidden message to API with the document content
         await append({
           role: 'user' as const,
           content: `Extract ALL information from this document exactly as it appears. Do not make assumptions, add interpretations, or leave out any details: ${metadataFromFile}\n\n${truncatedText}`,
