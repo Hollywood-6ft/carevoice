@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useRef } from "react";
 import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, Auth, User as FirebaseUser, updateProfile, getAuth, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import Cookies from 'js-cookie';
@@ -25,6 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  // Use a ref to track if we're currently redirecting to avoid multiple redirects
+  const isRedirecting = useRef(false);
 
   // Check for authentication cookie for an initial quick check
   useEffect(() => {
@@ -69,17 +71,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
             
-            // Redirect to dashboard if on signin page
-            if (pathname === '/signin') {
-              router.push('/?dashboard=true');
+            // Redirect to dashboard if on signin page, but avoid duplicating middleware redirects
+            if (pathname === '/signin' && !isRedirecting.current) {
+              isRedirecting.current = true;
+              // Use setTimeout to make this happen after the current execution cycle
+              setTimeout(() => {
+                router.push('/?dashboard=true');
+                // Reset the redirecting flag after a short delay to allow the navigation to complete
+                setTimeout(() => {
+                  isRedirecting.current = false;
+                }, 500);
+              }, 0);
             }
           } else {
             // Remove auth cookie when user is logged out
             Cookies.remove('auth');
             
-            // Redirect to signin if not already there
-            if (pathname !== '/signin') {
-              router.push('/signin');
+            // Redirect to signin if not already there and not currently redirecting
+            if (pathname !== '/signin' && !isRedirecting.current) {
+              isRedirecting.current = true;
+              // Use setTimeout to make this happen after the current execution cycle
+              setTimeout(() => {
+                router.push('/signin');
+                // Reset the redirecting flag after a short delay to allow the navigation to complete
+                setTimeout(() => {
+                  isRedirecting.current = false;
+                }, 500);
+              }, 0);
             }
           }
           
@@ -105,6 +123,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [pathname, router]);
 
   const signInWithGoogle = async () => {
+    // Prevent multiple sign-in attempts
+    if (loading || isRedirecting.current) return;
+    
     // Set loading to true when starting the sign-in process
     setLoading(true);
     
@@ -145,28 +166,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set auth cookie on successful sign in
       Cookies.set('auth', 'true', { expires: 7 });
       
-      // Force redirect to dashboard
-      router.push('/?dashboard=true');
+      // Mark that we're redirecting to avoid duplicate redirects
+      if (!isRedirecting.current) {
+        isRedirecting.current = true;
+        // Redirect is handled by the auth state change listener, but we'll add a backup here
+        setTimeout(() => {
+          router.push('/?dashboard=true');
+          // Reset the redirecting flag after a short delay
+          setTimeout(() => {
+            isRedirecting.current = false;
+          }, 500);
+        }, 100);
+      }
     } catch (error) {
       console.error("Error signing in with Google", error);
       // Make sure to set loading to false if sign-in fails
       setLoading(false);
+      isRedirecting.current = false;
     }
   };
 
   const signOutUser = async () => {
+    // Prevent multiple sign-out attempts
+    if (isRedirecting.current) return;
+    
     try {
       // Set loading to true during sign out to prevent UI flicker
       setLoading(true);
+      isRedirecting.current = true;
       
-      await firebaseSignOut(auth);
-      // Remove auth cookie on sign out
+      // Remove auth cookie on sign out before Firebase signOut to prevent flicker
       Cookies.remove('auth');
-      // Redirect to sign-in page after successful sign out
-      router.push('/signin');
+      
+      // Start redirect before Firebase signOut completes
+      setTimeout(() => {
+        router.push('/signin');
+      }, 0);
+      
+      // Then sign out from Firebase (this triggers the auth state change listener)
+      await firebaseSignOut(auth);
+      
+      // Reset the redirecting flag after a short delay
+      setTimeout(() => {
+        isRedirecting.current = false;
+      }, 500);
     } catch (error) {
       console.error("Error signing out", error);
       setLoading(false);
+      isRedirecting.current = false;
     }
   };
 

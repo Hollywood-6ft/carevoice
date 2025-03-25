@@ -7,12 +7,10 @@ import { Menu, X, Bell, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useInvitations } from '@/lib/contexts/InvitationContext';
 import { useTheme } from '@/lib/contexts/ThemeContext';
-import { auth } from '@/lib/firebase/firebase';
-import { signOut as firebaseSignOut } from 'firebase/auth';
 
 export default function NavMenu() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { pendingInvitations } = useInvitations();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
@@ -54,14 +52,6 @@ export default function NavMenu() {
   const getFirstName = () => {
     if (!user || !user.displayName) return 'User';
     return user.displayName.split(' ')[0];
-  };
-  
-  const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
   };
   
   const handleNotificationClick = () => {
@@ -121,7 +111,7 @@ export default function NavMenu() {
                       Hi {getFirstName()}
                     </span>
                     <button
-                      onClick={() => signOut()}
+                      onClick={signOut}
                       className="text-base text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     >
                       Sign Out
