@@ -8,6 +8,7 @@ import PdfAssessmentUploader from './PdfAssessmentUploader';
 import DownloadAssessmentPdf from './DownloadAssessmentPdf';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { defaultRampFields } from '@/lib/constants';
+import DocumentAnalysisButton from './DocumentAnalysisButton';
 
 // Status colors for note personalization
 const statusColors = [
@@ -473,6 +474,12 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
   // Display only the title based on readOnly mode
   const modalTitle = readOnly ? "View Assessment" : "Edit Assessment";
 
+  // Add handler for applying AI suggestions to initial assessment
+  const handleApplyAiSuggestion = (content: string) => {
+    setInitialAssessment(content);
+    setNoteChanged(true);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -539,12 +546,17 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
               {/* Basic Info Tab */}
               {activeTab === 'basic' && (
                 <div>
+                  {/* Add the DocumentAnalysisButton component here, above the Status section */}
+                  <DocumentAnalysisButton 
+                    onApplySuggestion={handleApplyAiSuggestion}
+                  />
+
                   {/* Status Selection */}
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Status
                     </label>
-                    <div className="flex gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {statusColors.map((statusOption) => (
                         <button
                           key={statusOption.value}

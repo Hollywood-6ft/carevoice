@@ -21,7 +21,7 @@ export default function AiChatPage() {
       setIsFileUploaded(true);
       
       // Call the document analysis API
-      const response = await fetch('/api/ai/analyze-document', {
+      const response = await fetch('/api/ai/analyse-document', {
         method: 'POST',
         body: formData,
       });
@@ -44,9 +44,9 @@ export default function AiChatPage() {
     <main className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Care Assistant</h1>
-          <p className="text-lg text-gray-600">
-            Upload documents or chat directly with our AI assistant for help with care assessments
+          <h1 className="text-3xl font-bold text-grey-900 mb-2">Care Assistant</h1>
+          <p className="text-lg text-grey-600">
+            Upload documents or chat directly with our assistant for help with care assessments
           </p>
         </div>
         
@@ -58,11 +58,11 @@ export default function AiChatPage() {
                   <Upload className="h-8 w-8 text-blue-600" />
                 </div>
               </div>
-              <h2 className="text-center text-xl font-semibold text-gray-800 mb-2">
+              <h2 className="text-center text-xl font-semibold text-grey-800 mb-2">
                 Start with a Document
               </h2>
-              <p className="text-center text-gray-600 mb-6">
-                Upload a care document and the AI will analyze it to provide tailored guidance
+              <p className="text-center text-grey-600 mb-6">
+                Upload a care document and the AI will analyse it to provide tailored guidance
               </p>
               <div className="flex flex-col space-y-4">
                 <label className="flex flex-col items-center px-4 py-6 bg-blue-50 text-blue-700 rounded-lg cursor-pointer hover:bg-blue-100 border-2 border-dashed border-blue-300">
@@ -82,7 +82,7 @@ export default function AiChatPage() {
                     setInitialContext('');
                     setShowChat(true);
                   }}
-                  className="w-full py-2 px-4 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="w-full py-2 px-4 bg-white border border-grey-300 rounded-md shadow-sm text-sm font-medium text-grey-700 hover:bg-grey-50"
                 >
                   Continue without a document
                 </button>

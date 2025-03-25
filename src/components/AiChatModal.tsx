@@ -22,27 +22,50 @@ interface ExtendedMessage {
 
 // Modify or extend the useChat hook to handle the hideFromUI option
 // This is a custom implementation since the standard useChat doesn't support this
-const useCustomChat = (initialContext: string = '') => {
+const useCustomChat = () => {
   const chatHook = useChat({
     api: '/api/anthropic/chat', // Use the chosen API endpoint
-    initialMessages: [
-      {
-        id: 'system-message',
-        role: 'system' as const,
-        content: `You are a helpful AI assistant specializing in care assessments and social work. Help the user complete their care assessment by providing information, drafting content, and answering questions about best practices in care assessments. When appropriate, offer to help write sections of the assessment based on the information provided.`
-      },
-      ...(initialContext ? [
-        {
-          id: 'initial-context',
-          role: 'user' as const,
-          content: initialContext
-        }
-      ] : [])
-    ],
+    initialMessages: [],
   });
   
-  // Create a custom version of messages that filters out hideFromUI messages
-  const visibleMessages = chatHook.messages.filter(msg => !(msg as ExtendedMessage).hideFromUI);
+  // Create a custom version of messages that filters out any unwanted messages
+  const visibleMessages = chatHook.messages.filter(msg => {
+    // Filter out messages marked as hideFromUI
+    if ((msg as ExtendedMessage).hideFromUI) {
+      return false;
+    }
+    
+    // Filter out any default error messages about being unable to read documents
+    if (msg.role === 'assistant' && 
+        (msg.content.includes("I'm unable to read") || 
+         msg.content.includes("I'm unable to access") ||
+         msg.content.includes("I can't view or read") ||
+         msg.content.includes("I'm sorry, but I can't") ||
+         msg.content.includes("I can't access or analyse") ||
+         msg.content.includes("unable to analyse") ||
+         msg.content.includes("couldn't analyse"))) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  // Remove duplicate content - look for messages with the exact same content
+  const uniqueContentMessages: ExtendedMessage[] = [];
+  const seenContent = new Set<string>();
+  
+  for (const msg of visibleMessages) {
+    // For each message, check if we've seen this content before
+    if (!seenContent.has(msg.content)) {
+      uniqueContentMessages.push(msg as ExtendedMessage);
+      seenContent.add(msg.content);
+    }
+  }
+  
+  // Remove any "Reading document" messages if we have at least one other message
+  const finalMessages = uniqueContentMessages.length > 1 
+    ? uniqueContentMessages.filter(msg => !msg.content.startsWith('Reading document:'))
+    : uniqueContentMessages;
   
   // Custom append function that supports the hideFromUI option
   const customAppend = async (message: any, options: { hideFromUI?: boolean } = {}) => {
@@ -57,14 +80,16 @@ const useCustomChat = (initialContext: string = '') => {
   
   return {
     ...chatHook,
-    messages: visibleMessages,
-    append: customAppend
+    messages: finalMessages,
+    append: customAppend,
+    // Make sure to explicitly include setMessages to avoid linter errors
+    setMessages: chatHook.setMessages
   };
 };
 
-export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initialContext = '' }: AiChatModalProps) {
+export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initialContext }: AiChatModalProps) {
   // Use our custom chat hook instead of the standard useChat
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error, append } = useCustomChat(initialContext);
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, append, setMessages } = useCustomChat();
   
   const [isCopied, setIsCopied] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -73,7 +98,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadStage, setUploadStage] = useState<'initial' | 'uploading' | 'extracting' | 'analyzing'>('initial');
+  const [uploadStage, setUploadStage] = useState<'initial' | 'uploading' | 'extracting' | 'analysing'>('initial');
   const [processingProgress, setProcessingProgress] = useState(0);
   const [mounted, setMounted] = useState(false);
   // Remove auto-scroll from initial render
@@ -161,12 +186,6 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       if (lastAssistantMessage && onApplySuggestion) {
         onApplySuggestion(lastAssistantMessage.content);
         setShowApplyButton(false);
-        
-        // Use an assistant message instead of system message for confirmation
-        append({
-          role: 'assistant' as const,
-          content: 'I\'ve applied the suggestion to your assessment form.',
-        });
       }
     }
   };
@@ -208,17 +227,6 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
     // Disable auto-scroll during file upload to prevent jumpiness
     setAutoScrollDisabled(true);
     
-    // Only add a simple message indicating the document is being processed
-    // But don't display any intermediate analysis messages
-    const userMessage = {
-      role: 'user' as const,
-      content: `I've uploaded a document: "${file.name}" for care assessment analysis.`,
-      id: Date.now().toString()
-    };
-    
-    // Just add the user message to indicate upload, without any AI response yet
-    append(userMessage);
-
     // Add validation for file type and size
     const validFileTypes = ['.pdf', '.doc', '.docx', '.txt'];
     const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
@@ -227,14 +235,12 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       setIsUploading(false);
       setUploadError(`Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file.`);
       
-      // Brief delay before showing error message
       setTimeout(() => {
         append({
           role: 'assistant' as const,
           content: `Sorry, I can only process PDF, DOC, DOCX, or TXT files. Please upload a file with one of these formats.`,
         });
         
-        // Re-enable auto-scroll after error message is shown
         setTimeout(() => setAutoScrollDisabled(false), 500);
       }, 500);
       
@@ -248,14 +254,12 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       setIsUploading(false);
       setUploadError(`File size exceeds the 10MB limit.`);
       
-      // Brief delay before showing error message
       setTimeout(() => {
         append({
           role: 'assistant' as const,
-          content: `The file you uploaded is too large (maximum size is 10MB). Please upload a smaller file or extract the relevant portion into a smaller document.`,
+          content: `The file you uploaded is too large. Please upload a file smaller than 10MB.`,
         });
         
-        // Re-enable auto-scroll after error message is shown
         setTimeout(() => setAutoScrollDisabled(false), 500);
       }, 500);
       
@@ -264,104 +268,84 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       }
       return;
     }
-
-    const formData = new FormData();
-    formData.append('file', file);
     
     try {
-      // Update stage to extracting text
-      setUploadStage('extracting');
-      setProcessingProgress(30);
+      // Reset the chat completely
+      setMessages([]);
       
-      // Call the document analysis API
-      const response = await fetch('/api/ai/analyze-document', {
+      // Create form data for the API call
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      setUploadStage('extracting');
+      
+      // Add a temporary reading message
+      await append({
+        role: 'assistant' as const,
+        content: `Reading document: "${file.name}"...`
+      });
+      
+      // Call the API to extract text from the document and analyse it with AI
+      const response = await fetch('/api/ai/analyse-document', {
         method: 'POST',
         body: formData,
       });
       
-      // Set progress to indicate text extraction is complete
-      setProcessingProgress(60);
-      setUploadStage('analyzing');
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
       
-      // Parse the response JSON even if there's an error status
       const data = await response.json();
       
-      // Set progress to indicate we're ready to analyze
-      setProcessingProgress(80);
-      
-      // Handle API errors
-      if (!response.ok) {
-        throw new Error(data.error || `Error: ${response.status}`);
+      if (data.error) {
+        throw new Error(data.error);
       }
       
-      // If the API returned text, proceed with analysis
-      if (data.text) {
-        // Check if there are warnings from the server
-        const hasWarning = data.warning !== null && data.warning !== undefined;
-        
-        // No intermediate update messages - skip these to avoid confusion
-        
-        // Truncate very long documents to avoid token limits
-        const truncatedText = data.text.length > 12000 
-          ? data.text.substring(0, 12000) + "...\n[Content truncated due to length]" 
-          : data.text;
-        
-        // Add metadata if there were warnings
-        const metadataFromFile = hasWarning ? 
-          "Note: The system had some difficulty extracting all the text from this document." : "";
-        
-        // Set progress complete
-        setProcessingProgress(100);
-        
-        // Send the hidden message to API - with a clearer prompt to avoid confusion
+      setUploadStage('analysing');
+      
+      // Reset the chat AGAIN to remove the "Reading document" message
+      setMessages([]);
+      
+      // Now add ONLY the analysis to the empty chat
+      if (data.analysis) {
         await append({
-          role: 'user' as const,
-          content: `Analyze this document for a care assessment: ${metadataFromFile}\n\n${truncatedText}`,
-        }, { hideFromUI: true });
-        
-        // Re-enable auto-scrolling after a delay
-        setTimeout(() => {
-          setAutoScrollDisabled(false);
-        }, 1000);
+          role: 'assistant' as const,
+          content: data.analysis
+        });
       } else {
-        // Handle the case where text extraction was successful but no text was found
-        setTimeout(() => {
-          append({
-            role: 'user' as const,
-            content: `The system couldn't extract any text from "${file.name}". Can you help me with creating a care assessment without the document?`,
-          });
-          
-          // Re-enable auto-scrolling
-          setAutoScrollDisabled(false);
-        }, 500);
+        await append({
+          role: 'assistant' as const,
+          content: `I've extracted the text from "${file.name}", but I couldn't perform a full analysis. Please ask me specific questions about the document content.`
+        });
       }
       
-      // Reset the file input
+    } catch (err: any) {
+      console.error('Error processing document:', err);
+      
+      // Reset the chat
+      setMessages([]);
+      
+      // Add only the error message
+      append({
+        role: 'assistant' as const,
+        content: `I encountered an error while processing your document: ${err.message || 'Unknown error'}. Please try again with a different file or format.`,
+      });
+      
+    } finally {
+      setIsUploading(false);
+      // Re-enable auto-scroll after upload is complete
+      setTimeout(() => {
+        setAutoScrollDisabled(false);
+        
+        // Scroll to bottom after everything is done
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      }, 500);
+      
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      const errorMessage = (error as Error).message || 'Failed to upload document';
-      setUploadError(errorMessage);
-      
-      // Show error in the chat with guidance after a brief delay
-      setTimeout(() => {
-        append({
-          role: 'assistant' as const,
-          content: `There was an error processing your document: ${errorMessage}. 
-          
-  You could try:
-  - Using a different file format (TXT files usually work best)
-  - Ensuring the document isn't password protected
-  - Describing the key information from the document directly in our conversation`,
-        });
-        
-        // Re-enable auto-scrolling
-        setAutoScrollDisabled(false);
-      }, 500);
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -372,10 +356,10 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
       <div className={`relative w-full max-w-4xl mx-auto bg-white rounded-lg shadow-xl flex flex-col h-[80vh] transition-transform duration-300 ${mounted ? 'translate-y-0' : 'translate-y-4'}`}>
         {/* Header - fixed height */}
         <div className="px-6 py-4 border-b flex justify-between items-center flex-shrink-0 h-16">
-          <h2 className="text-xl font-semibold text-gray-800">AI Care Assistant</h2>
+          <h2 className="text-xl font-semibold text-grey-800">Care Assistant</h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="text-grey-500 hover:text-grey-700 focus:outline-none"
           >
             <XIcon className="h-5 w-5" />
           </button>
@@ -389,26 +373,6 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
         >
           <div className="flex flex-col h-full">
             <div className="flex-grow space-y-4">
-              {/* Welcome message if no messages */}
-              {messages.length <= 1 && (
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <h3 className="font-medium text-blue-800 mb-2">Welcome to the AI Care Assistant</h3>
-                  <p className="text-blue-700">
-                    Ask any questions about care assessments, request help drafting sections,
-                    or get assistance with understanding care guidelines.
-                  </p>
-                  <div className="mt-3 bg-white p-3 rounded-md border border-blue-200">
-                    <div className="flex items-center text-blue-700">
-                      <FileText className="h-4 w-4 mr-2" />
-                      <span className="text-sm font-medium">Attach a document for analysis</span>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-1">
-                      Upload a care document to analyze its content and get assistance with your assessment.
-                    </p>
-                  </div>
-                </div>
-              )}
-              
               {/* Messages */}
               {messages
                 .filter(m => m.role !== 'system') // Don't show system messages
@@ -421,7 +385,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
                       className={`max-w-[80%] rounded-lg p-4 ${
                         message.role === 'user' 
                           ? 'bg-blue-100 text-blue-900' 
-                          : 'bg-gray-100 text-gray-800'
+                          : 'bg-grey-100 text-grey-800'
                       }`}
                     >
                       {message.role === 'assistant' ? (
@@ -445,10 +409,10 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
             <div className={`h-20 mt-4 transition-opacity duration-300 ${isLoading ? 'opacity-100' : 'opacity-0'}`}>
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="max-w-[80%] rounded-lg p-4 bg-gray-100 text-gray-800 shadow-md">
+                  <div className="max-w-[80%] rounded-lg p-4 bg-grey-100 text-grey-800 shadow-md">
                     <div className="flex items-center min-h-[36px]">
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>AI is responding...</span>
+                      <span>Assistant is responding...</span>
                     </div>
                   </div>
                 </div>
@@ -468,7 +432,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
         
         {/* Action buttons - fixed height */}
         {messages.length > 1 && messages.some(m => m.role === 'assistant') && (
-          <div className="border-t border-b px-4 py-2 flex gap-2 bg-gray-50 flex-shrink-0 h-12">
+          <div className="border-t border-b px-4 py-2 flex gap-2 bg-grey-50 flex-shrink-0 h-12">
             {onApplySuggestion && showApplyButton && (
               <button
                 onClick={handleApplySuggestion}
@@ -480,7 +444,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
             )}
             <button
               onClick={handleCopyLastMessage}
-              className="text-sm px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors flex items-center"
+              className={`text-sm px-3 py-1 ${isCopied ? 'bg-green-500' : 'bg-grey-200 hover:bg-grey-300'} rounded flex items-center transition-colors`}
             >
               {isCopied ? (
                 <>
@@ -523,7 +487,7 @@ export default function AiChatModal({ isOpen, onClose, onApplySuggestion, initia
                 type="button"
                 onClick={handleAttachClick}
                 disabled={isLoading || isUploading}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-grey-400 hover:text-grey-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Paperclip className="h-5 w-5" />
               </button>

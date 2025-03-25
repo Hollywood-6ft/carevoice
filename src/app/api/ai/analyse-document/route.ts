@@ -120,16 +120,16 @@ async function processFormData(req: NextRequest) {
   }
 }
 
-// Analyze the text with Claude
-async function analyzeWithClaude(text: string, fileName: string) {
+// Analyse the text with Claude
+async function analyseWithClaude(text: string, fileName: string) {
   try {
     const anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY || '',
     });
 
-    const prompt = `You are a helpful AI assistant specializing in care assessments and social work. You've been provided with the contents of a document called "${fileName}". 
+    const prompt = `You are a helpful AI assistant specialising in care assessments and social work. You've been provided with the contents of a document called "${fileName}". 
 
-    Please analyze this document for information relevant to a care assessment, focusing on:
+    Please analyse this document for information relevant to a care assessment, focusing on:
     - Medical conditions and diagnoses
     - Care needs and limitations
     - Support requirements
@@ -161,8 +161,8 @@ async function analyzeWithClaude(text: string, fileName: string) {
     const analysis = typeof content === 'object' && 'text' in content ? content.text : '';
     return { analysis };
   } catch (err) {
-    console.error('Error analyzing with Claude:', err);
-    return { error: 'Failed to analyze the document' };
+    console.error('Error analysing with Claude:', err);
+    return { error: 'Failed to analyse the document' };
   }
 }
 
@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call AI analysis with Claude
-    const analysisResult = await analyzeWithClaude(result.text, result.fileName);
+    const analysisResult = await analyseWithClaude(result.text, result.fileName);
     
     if ('error' in analysisResult) {
       return NextResponse.json({ error: analysisResult.error }, { status: 500 });

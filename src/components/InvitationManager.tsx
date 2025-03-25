@@ -153,6 +153,42 @@ const InvitationManager = () => {
       setError('Failed to delete invitation. Please try again.');
     }
   };
+  
+  const handleClearDeclinedInvitations = async () => {
+    if (!user) return;
+    
+    try {
+      // Filter for declined invitations only
+      const declinedInvitations = receivedInvitations.filter(
+        (inv) => inv.status === 'declined'
+      );
+      
+      if (declinedInvitations.length === 0) {
+        setError('No declined invitations to clear.');
+        setTimeout(() => setError(''), 3000);
+        return;
+      }
+      
+      // Delete each declined invitation
+      const deletePromises = declinedInvitations.map(invitation => 
+        deleteDocument('invitations', invitation.id)
+      );
+      
+      await Promise.all(deletePromises);
+      
+      // Refresh local component state
+      await fetchInvitations();
+      
+      // Also refresh the global invitations context
+      await refreshInvitationsContext();
+      
+      setSuccessMessage(`Cleared ${declinedInvitations.length} declined invitation(s) successfully!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error clearing declined invitations:', error);
+      setError('Failed to clear declined invitations. Please try again.');
+    }
+  };
 
   const handleRespondToInvitation = async (invitationId: string, status: 'accepted' | 'declined') => {
     if (!user) return;
@@ -337,6 +373,17 @@ const InvitationManager = () => {
           <p className="text-gray-500 italic">You haven&apos;t received any invitations yet.</p>
         ) : (
           <div className="overflow-x-auto">
+            {/* Clear declined invitations button */}
+            {receivedInvitations.some(inv => inv.status === 'declined') && (
+              <div className="mb-4 flex justify-end">
+                <button
+                  onClick={handleClearDeclinedInvitations}
+                  className="bg-red-600 text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Clear Declined Invitations
+                </button>
+              </div>
+            )}
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
