@@ -7,6 +7,9 @@ export function middleware(request: NextRequest) {
 
   // Define public paths that don't require authentication
   const isPublicPath = path === '/signin';
+  
+  // Check if we're at the root path with no subpath
+  const isRootPath = path === '/';
 
   // Get the token from the cookies
   const token = request.cookies.get('auth')?.value || '';
@@ -14,6 +17,16 @@ export function middleware(request: NextRequest) {
   // Redirect authenticated users away from signin page
   if (isPublicPath && token) {
     return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  // Redirect authenticated users at root path to the dashboard
+  if (isRootPath && token) {
+    // Check if the URL already has a query param to avoid infinite redirects
+    const url = new URL(request.url);
+    if (!url.searchParams.has('dashboard')) {
+      url.searchParams.set('dashboard', 'true');
+      return NextResponse.redirect(url);
+    }
   }
 
   // Redirect unauthenticated users to signin page

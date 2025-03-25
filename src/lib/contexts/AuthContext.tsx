@@ -4,7 +4,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, Auth, User as FirebaseUser, updateProfile, getAuth, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Check for authentication cookie for an initial quick check
   useEffect(() => {
@@ -67,9 +68,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.error("Error updating profile:", error);
               }
             }
+            
+            // Redirect to dashboard if on signin page
+            if (pathname === '/signin') {
+              router.push('/?dashboard=true');
+            }
           } else {
             // Remove auth cookie when user is logged out
             Cookies.remove('auth');
+            
+            // Redirect to signin if not already there
+            if (pathname !== '/signin') {
+              router.push('/signin');
+            }
           }
           
           setUser(user);
@@ -91,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         unsubscribe();
       }
     };
-  }, []);
+  }, [pathname, router]);
 
   const signInWithGoogle = async () => {
     // Set loading to true when starting the sign-in process
@@ -133,6 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Set auth cookie on successful sign in
       Cookies.set('auth', 'true', { expires: 7 });
+      
+      // Force redirect to dashboard
+      router.push('/?dashboard=true');
     } catch (error) {
       console.error("Error signing in with Google", error);
       // Make sure to set loading to false if sign-in fails

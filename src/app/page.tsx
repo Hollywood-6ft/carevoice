@@ -9,12 +9,13 @@ import InvitationManager from '@/components/InvitationManager';
 import SharedBoardsView from '@/components/SharedBoardsView';
 import { useState, useEffect, Suspense } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 function HomeContent() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('myBoard');
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   // Set active tab based on URL parameter
   useEffect(() => {
@@ -22,7 +23,16 @@ function HomeContent() {
     if (tabParam && ['myBoard', 'sharedWithMe', 'manageInvitations'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
-  }, [searchParams]);
+    
+    // If this is a dashboard page and user is logged in, redirect to clean URL
+    const isDashboard = searchParams.get('dashboard');
+    if (isDashboard === 'true' && user) {
+      // Use replace to avoid adding to browser history
+      const url = new URL(window.location.href);
+      url.searchParams.delete('dashboard');
+      router.replace(url.pathname + url.search);
+    }
+  }, [searchParams, user, router]);
   
   // Show loading spinner while authentication state is being determined
   if (loading) {

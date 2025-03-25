@@ -11,7 +11,7 @@ export default function SignIn() {
   // Redirect to main page if already authenticated
   useEffect(() => {
     if (user) {
-      router.push('/');
+      router.push('/?dashboard=true');
     }
   }, [user, router]);
 
@@ -31,7 +31,12 @@ export default function SignIn() {
           <div className="mt-8">
             {/* Google Sign In */}
             <button 
-              onClick={signInWithGoogle} 
+              onClick={() => {
+                signInWithGoogle().then(() => {
+                  // Force redirect after sign in
+                  router.push('/?dashboard=true');
+                });
+              }} 
               className="w-full h-12 flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-300 rounded-full transition-colors"
             >
               <svg width="20" height="20" viewBox="0 0 18 18" className="mr-3">
