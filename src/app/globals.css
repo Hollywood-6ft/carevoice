@@ -9,14 +9,33 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
   }
 }
 
 @layer base {
   body {
-    @apply text-gray-900 dark:text-gray-100;
+    @apply bg-white text-gray-900 dark:bg-[#1a1f2c] dark:text-gray-100;
+  }
+
+  /* Navigation styles */
+  nav {
+    @apply bg-white dark:bg-[#1a1f2c] border-b border-gray-200 dark:border-gray-800;
+  }
+
+  /* Card and container styles */
+  .card {
+    @apply bg-white dark:bg-[#1e2330] border border-gray-200 dark:border-gray-800;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700;
   }
 }
 

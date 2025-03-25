@@ -16,8 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-white dark:bg-gray-900">
-        <ThemeProvider attribute="class">
+      <body className="min-h-screen">
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
           <AuthProvider>
             <InvitationProvider>
               <NavMenu />

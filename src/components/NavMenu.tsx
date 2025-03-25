@@ -69,7 +69,7 @@ export default function NavMenu() {
 
   return (
     <>
-      <nav className="bg-white dark:bg-gray-900 shadow z-20 fixed w-full top-0 transition-colors duration-200">
+      <nav className="shadow-sm z-20 fixed w-full top-0 transition-colors duration-200">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -90,10 +90,10 @@ export default function NavMenu() {
                   {/* Notification Bell */}
                   <button
                     onClick={handleNotificationClick}
-                    className="relative p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="relative p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     aria-label={pendingInvitations.length > 0 ? `${pendingInvitations.length} pending invitations` : "No pending invitations"}
                   >
-                    <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                    <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                     {pendingInvitations.length > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                         {pendingInvitations.length}
@@ -117,7 +117,7 @@ export default function NavMenu() {
                   {/* Mobile menu button */}
                   <button
                     onClick={toggleMobileMenu}
-                    className="md:hidden ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="md:hidden ml-2 inline-flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     aria-label="Toggle mobile menu"
                   >
                     {showMobileMenu ? (
@@ -138,16 +138,16 @@ export default function NavMenu() {
         <>
           {/* Dark overlay behind the menu */}
           <div 
-            className="fixed inset-0 bg-black/50 z-30"
+            className="fixed inset-0 bg-black/20 dark:bg-black/40 z-30"
             onClick={() => setShowMobileMenu(false)}
             aria-hidden="true"
           />
           
           {/* Mobile menu content */}
-          <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="md:hidden fixed top-16 left-0 right-0 z-30 border-t border-gray-200 dark:border-gray-800 max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 pt-3 pb-4 space-y-3">
               {user && (
-                <div className="flex items-center pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center pb-2 mb-2 border-b border-gray-200 dark:border-gray-800">
                   <span className="text-base font-medium text-gray-700 dark:text-gray-300">
                     Hi {getFirstName()}
                   </span>
