@@ -30,19 +30,19 @@ function HomeContent() {
   }
   
   return (
-    <main className="min-h-screen bg-white pt-6 pb-20">
+    <main className="min-h-screen bg-white dark:bg-gray-900 pt-6 pb-20 transition-colors duration-200">
       <div className="container mx-auto px-4">
         <div className="w-full max-w-4xl mx-auto">
           {user && (
             <div className="mb-6">
-              <div className="border-b border-gray-200">
+              <div className="border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-8">
                   <button
                     onClick={() => setActiveTab('myBoard')}
                     className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
                       ${activeTab === 'myBoard' 
-                        ? 'border-blue-500 text-blue-600' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
                   >
                     My Board
                   </button>
@@ -50,8 +50,8 @@ function HomeContent() {
                     onClick={() => setActiveTab('sharedWithMe')}
                     className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
                       ${activeTab === 'sharedWithMe' 
-                        ? 'border-blue-500 text-blue-600' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
                   >
                     Shared With Me
                   </button>
@@ -59,8 +59,8 @@ function HomeContent() {
                     onClick={() => setActiveTab('manageInvitations')}
                     className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm 
                       ${activeTab === 'manageInvitations' 
-                        ? 'border-blue-500 text-blue-600' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
                   >
                     Manage Access
                   </button>
@@ -71,7 +71,7 @@ function HomeContent() {
           
           {user && activeTab === 'myBoard' && (
             <>
-              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 p-6 mb-8 transition-colors duration-200">
                 <DeepgramProvider>
                   <VoiceRecorder />
                 </DeepgramProvider>
@@ -93,8 +93,8 @@ function HomeContent() {
           
           {!user && (
             <div className="text-center py-10">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Welcome to CareVoice Assistant</h2>
-              <p className="text-gray-600 mb-6">Sign in to access your assessments and start recording.</p>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Welcome to CareVoice Assistant</h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">Sign in to access your assessments and start recording.</p>
               <div className="inline-block">
                 <SignInWithGoogle />
               </div>

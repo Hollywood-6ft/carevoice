@@ -9,7 +9,7 @@ export default function SignInWithGoogle() {
   return (
     <button
       onClick={signInWithGoogle}
-      className="flex items-center justify-center bg-white text-gray-700 font-semibold py-2 px-4 rounded-full border border-gray-300 hover:bg-gray-100 transition duration-300 ease-in-out"
+      className="flex items-center justify-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold py-2 px-4 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300 ease-in-out"
     >
       <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24">
         <path

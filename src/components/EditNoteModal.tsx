@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { updateDocument, getDocuments, addDocument, uploadFile } from '@/lib/firebase/firebaseUtils';
 import { Loader2, X, CheckCircle, Calendar, AlertCircle, AlertTriangle, FileText, Eye } from 'lucide-react';
 import { format, addWeeks, addMonths } from 'date-fns';
 import PdfAssessmentUploader from './PdfAssessmentUploader';
-import AiChatModal from './AiChatModal';
 import DownloadAssessmentPdf from './DownloadAssessmentPdf';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { defaultRampFields } from '@/lib/constants';
 
 // Status colors for note personalization
 const statusColors = [
-  { name: 'In Progress', value: 'medium', color: 'bg-amber-200', textColor: 'text-amber-700' },
-  { name: 'Completed', value: 'high', color: 'bg-green-200', textColor: 'text-green-700' },
-  { name: 'Care No longer needed', value: 'low', color: 'bg-red-200', textColor: 'text-red-700' },
+  { name: 'In Progress', value: 'medium', color: 'bg-amber-200 dark:bg-amber-900/60', textColor: 'text-amber-700 dark:text-amber-300' },
+  { name: 'Completed', value: 'high', color: 'bg-green-200 dark:bg-green-900/60', textColor: 'text-green-700 dark:text-green-300' },
+  { name: 'Care No longer needed', value: 'low', color: 'bg-red-200 dark:bg-red-900/60', textColor: 'text-red-700 dark:text-red-300' },
 ];
 
 // Note categories for assessments
@@ -25,33 +26,9 @@ const noteCategories = [
 
 // Priority levels
 const priorityLevels = [
-  { name: 'Low', value: 'low', color: 'bg-gray-200' },
-  { name: 'Medium', value: 'medium', color: 'bg-yellow-200' },
-  { name: 'High', value: 'high', color: 'bg-red-200' },
-];
-
-// Ramp fields with titles
-const defaultRampFields = [
-  { id: 'ramp1', title: 'Ramp 1: Respiratory Care' },
-  { id: 'ramp2', title: 'Ramp 2: Psychological' },
-  { id: 'ramp3', title: 'Ramp 3: Nutrition' },
-  { id: 'ramp4', title: 'Ramp 4: Skin integrity' },
-  { id: 'ramp5', title: 'Ramp 5: Mobility' },
-  { id: 'ramp6', title: 'Ramp 6: Personal hygiene' },
-  { id: 'ramp7', title: 'Ramp 7: Elimination' },
-  { id: 'ramp8', title: 'Ramp 8: Sleeping' },
-  { id: 'ramp9', title: 'Ramp 9: End of life care' },
-  { id: 'ramp10', title: 'Ramp 10: Sexuality' },
-  { id: 'ramp11', title: 'Ramp 11: Living environment' },
-  { id: 'ramp12', title: 'Ramp 12: Activities of daily living' },
-  { id: 'ramp13', title: 'Ramp 13: Medication' },
-  { id: 'ramp14', title: 'Ramp 14: Communication' },
-  { id: 'ramp15', title: 'Ramp 15: Moving and handling' },
-  { id: 'ramp16', title: 'Ramp 16: Falls and Safety' },
-  { id: 'ramp17', title: 'Ramp 17: COSSH' },
-  { id: 'ramp18', title: 'Ramp 18: Money Management' },
-  { id: 'ramp19', title: 'Ramp 19: Social and Spiritual' },
-  { id: 'ramp20', title: 'Ramp 20: Challenging Behaviour' },
+  { name: 'Low', value: 'low', color: 'bg-gray-200 dark:bg-gray-700' },
+  { name: 'Medium', value: 'medium', color: 'bg-yellow-200 dark:bg-yellow-900/60' },
+  { name: 'High', value: 'high', color: 'bg-red-200 dark:bg-red-900/60' },
 ];
 
 interface EditNoteModalProps {
@@ -127,7 +104,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
   const [priority, setPriority] = useState(note.priority || 'low');
   const [reminders, setReminders] = useState(note.reminders || {});
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'basic' | 'ramp' | 'additional'>('basic');
+  const [activeTab, setActiveTab] = useState('basic');
   const [serviceUserError, setServiceUserError] = useState(false);
   const [firstVisitDateError, setFirstVisitDateError] = useState(false);
   const [assessorError, setAssessorError] = useState(false);
@@ -161,9 +138,6 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
   
   // Add new state for PDF content
   const [pdfContent, setPdfContent] = useState<string | null>(null);
-  
-  // Add state to control AI chat modal visibility
-  const [showAiChat, setShowAiChat] = useState(false);
   
   const [customRampFields, setCustomRampFields] = useState<{ id: string; title: string; value: string }[]>(
     note.customRampFields || []
@@ -496,12 +470,6 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
     }
   };
 
-  // Function to handle AI-generated content
-  const handleAiSuggestion = (content: string) => {
-    // Set the AI-generated content to the initialAssessment field
-    setInitialAssessment(content);
-  };
-
   // Display only the title based on readOnly mode
   const modalTitle = readOnly ? "View Assessment" : "Edit Assessment";
 
@@ -511,16 +479,16 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
     <div 
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 ${isOpen ? 'block' : 'hidden'}`}
     >
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
               <FileText className="inline-block mr-2" size={24} />
               {modalTitle}
             </h2>
             <button 
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               disabled={isSaving}
             >
               <X size={24} />
@@ -528,14 +496,14 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
           </div>
           
           {/* Tab Buttons */}
-          <div className="border-b border-gray-200 mb-6">
+          <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
             <nav className="-mb-px flex space-x-6">
               <button
                 onClick={() => setActiveTab('basic')}
                 className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm 
                   ${activeTab === 'basic' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
                 type="button"
               >
                 Basic Info
@@ -544,8 +512,8 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                 onClick={() => setActiveTab('ramp')}
                 className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm 
                   ${activeTab === 'ramp' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
                 type="button"
               >
                 RAMP Assessment
@@ -554,52 +522,13 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                 onClick={() => setActiveTab('additional')}
                 className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm 
                   ${activeTab === 'additional' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'}`}
                 type="button"
               >
                 Additional Info
               </button>
             </nav>
-          </div>
-          
-          {/* AI care assistant info box */}
-          <div className="bg-blue-50 p-4 rounded-lg mb-6">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-0.5 text-blue-500">
-                <svg 
-                  className="h-6 w-6" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor" 
-                  strokeWidth={2}
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" 
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">AI Care Assistant</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Chat with our AI assistant for help with assessments, drafting care plans, or answering questions about care guidelines.
-                </p>
-                {!readOnly && (
-                  <div className="mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowAiChat(true)}
-                      className="inline-flex items-center px-3 py-1.5 border border-blue-700 text-xs font-medium rounded text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Open AI Assistant
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
           
           <form onSubmit={(e) => {
@@ -612,7 +541,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                 <div>
                   {/* Status Selection */}
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Status
                     </label>
                     <div className="flex gap-2">
@@ -628,8 +557,8 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                               }
                             }
                           }}
-                          className={`px-3 py-1.5 rounded-md border ${
-                            status === statusOption.value ? 'ring-2 ring-blue-500' : ''
+                          className={`px-3 py-1.5 rounded-md border dark:border-gray-600 ${
+                            status === statusOption.value ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
                           } ${statusOption.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
                           disabled={readOnly}
                         >
@@ -641,7 +570,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
 
                   {/* Priority Selection */}
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Priority
                     </label>
                     <div className="flex gap-2">
@@ -654,8 +583,8 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                               setPriority(lvl.value);
                             }
                           }}
-                          className={`px-3 py-1.5 rounded-md border ${
-                            priority === lvl.value ? 'ring-2 ring-blue-500' : ''
+                          className={`px-3 py-1.5 rounded-md border dark:border-gray-600 ${
+                            priority === lvl.value ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
                           } ${lvl.color} ${readOnly ? 'opacity-80 cursor-default' : ''}`}
                           disabled={readOnly}
                         >
@@ -667,8 +596,8 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                   
                   {/* Service User name field */}
                   <div>
-                    <label htmlFor="service-user" className="block text-sm font-medium text-gray-700 mb-1">
-                      Service User <span className="text-red-600">*</span>
+                    <label htmlFor="service-user" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Service User <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       id="service-user"
@@ -681,20 +610,20 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                         }
                       }}
                       disabled={readOnly}
-                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        serviceUserError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                        serviceUserError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                      } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
                       placeholder="Enter service user name"
                     />
                     {serviceUserError && (
-                      <p className="mt-1 text-sm text-red-600">Service user name is required</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">Service user name is required</p>
                     )}
                   </div>
                   
                   {/* First Visit Date field */}
                   <div className="mt-4">
-                    <label htmlFor="first-visit-date" className="block text-sm font-medium text-gray-700 mb-1">
-                      First Visit Date <span className="text-red-600">*</span>
+                    <label htmlFor="first-visit-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      First Visit Date <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       id="first-visit-date"
@@ -707,19 +636,19 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                         }
                       }}
                       disabled={readOnly}
-                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        firstVisitDateError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                        firstVisitDateError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                      } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
                     />
                     {firstVisitDateError && (
-                      <p className="mt-1 text-sm text-red-600">First visit date is required</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">First visit date is required</p>
                     )}
                   </div>
                   
                   {/* Assessor field */}
                   <div className="mt-4">
-                    <label htmlFor="assessor" className="block text-sm font-medium text-gray-700 mb-1">
-                      Assessor <span className="text-red-600">*</span>
+                    <label htmlFor="assessor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Assessor <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       id="assessor"
@@ -732,19 +661,19 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                         }
                       }}
                       disabled={readOnly}
-                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        assessorError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      } ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                        assessorError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
+                      } ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
                       placeholder="Enter assessor name"
                     />
                     {assessorError && (
-                      <p className="mt-1 text-sm text-red-600">Assessor name is required</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">Assessor name is required</p>
                     )}
                   </div>
                   
                   {/* Category Selection */}
                   <div className="mt-4">
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Category
                     </label>
                     <select
@@ -752,7 +681,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       disabled={readOnly}
-                      className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:text-white ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
                     >
                       {noteCategories.map((cat) => (
                         <option key={cat} value={cat}>
@@ -764,7 +693,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                   
                   {/* Initial Assessment Content */}
                   <div className="mt-4">
-                    <label htmlFor="initial-assessment" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="initial-assessment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Social Worker Initial Assessment
                     </label>
                     <div className="relative">
@@ -773,7 +702,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                         value={initialAssessment}
                         onChange={(e) => setInitialAssessment(e.target.value)}
                         disabled={readOnly}
-                        className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                        className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
                         placeholder="Enter assessment details..."
                       />
                     </div>
@@ -781,7 +710,7 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                   
                   {/* Assessment Notes */}
                   <div className="mt-4">
-                    <label htmlFor="assessment-notes" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="assessment-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Assessment Notes
                     </label>
                     <textarea
@@ -789,22 +718,22 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       disabled={readOnly}
-                      className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`w-full h-32 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${readOnly ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
                       placeholder="Enter assessment notes..."
                     />
                   </div>
                   
                   {/* Reminders information - shown when Initial Assessment is marked completed */}
                   {category === 'Initial Assessment' && status === 'high' && (
-                    <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800 mt-4">
                       <div className="flex items-start">
-                        <Calendar className="text-blue-500 mr-2 mt-0.5" size={18} />
+                        <Calendar className="text-blue-500 dark:text-blue-400 mr-2 mt-0.5" size={18} />
                         <div>
-                          <h3 className="font-medium text-blue-800">Automatic Reminders</h3>
-                          <p className="text-sm text-blue-700 mb-2">
+                          <h3 className="font-medium text-blue-800 dark:text-blue-300">Automatic Reminders</h3>
+                          <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
                             When you save this completed Initial Assessment, the following follow-up assessments will be automatically scheduled:
                           </p>
-                          <ul className="text-sm text-blue-700 pl-5 list-disc">
+                          <ul className="text-sm text-blue-700 dark:text-blue-400 pl-5 list-disc">
                             <li>Registered Manager Introduction - in 2 weeks</li>
                             <li>3-month review - in 3 months</li>
                             <li>6-month review - in 6 months</li>
@@ -1109,10 +1038,27 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
               )}
             </div>
             
-            {/* Fixed Save Button at the bottom */}
-            {!readOnly && (
-              <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-6 flex justify-between">
-                <DownloadAssessmentPdf 
+            {/* Action Buttons */}
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
+              <div className="flex space-x-4">
+                {!readOnly && (
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium rounded-md shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Assessment'
+                    )}
+                  </button>
+                )}
+                
+                <DownloadAssessmentPdf
                   assessment={{
                     serviceUser,
                     firstVisitDate,
@@ -1145,74 +1091,29 @@ export default function EditNoteModal({ note, isOpen, onClose, onSave, readOnly 
                     carePlanApproval
                   }}
                 />
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Assessment'
-                  )}
-                </button>
               </div>
-            )}
+
+              {/* Cancel button */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                disabled={isSaving}
+              >
+                {readOnly ? 'Close' : 'Cancel'}
+              </button>
+            </div>
             
-            {/* Download PDF button for read-only assessments */}
-            {readOnly && (
-              <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-6 flex justify-end">
-                <DownloadAssessmentPdf 
-                  assessment={{
-                    serviceUser,
-                    firstVisitDate,
-                    assessor,
-                    status,
-                    category,
-                    priority,
-                    ...Object.fromEntries(
-                      rampFields.map(field => [field.id, rampValues[field.id] || ''])
-                    ),
-                    rampFieldTitles: Object.fromEntries(
-                      rampFields
-                        .filter(field => {
-                          const defaultField = defaultRampFields.find(df => df.id === field.id);
-                          return defaultField && field.title !== defaultField.title;
-                        })
-                        .map(field => [field.id, field.title])
-                    ),
-                    customRampFields,
-                    accessDetails,
-                    medicalBackground,
-                    medicationList,
-                    supportRequired,
-                    lpaHealth,
-                    lpaFinance,
-                    keyWorker,
-                    gender,
-                    ethnicity,
-                    initialAssessment,
-                    carePlanApproval
-                  }}
-                />
+            {/* Form error message */}
+            {showErrorMessage && formError && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md text-sm flex items-center">
+                <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span>{formError}</span>
               </div>
             )}
           </form>
         </div>
       </div>
-      
-      {/* AI Chat Modal */}
-      {showAiChat && (
-        <AiChatModal
-          isOpen={showAiChat}
-          onClose={() => setShowAiChat(false)}
-          onApplySuggestion={handleAiSuggestion}
-          initialContext={`I'm completing a care assessment for client "${serviceUser || '[Not specified]'}" and could use some assistance. ${initialAssessment ? `\n\nCurrent assessment details: ${initialAssessment}` : ''}`}
-        />
-      )}
     </div>
   );
-} 
+}

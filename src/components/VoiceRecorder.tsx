@@ -199,140 +199,96 @@ export default function VoiceRecorder() {
               relative z-10 w-16 h-16 rounded-full flex items-center justify-center transition-all
               ${isRecording 
                 ? 'bg-red-500 hover:bg-red-600' 
-                : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
-              } 
+                : 'bg-blue-500 hover:bg-blue-600'} 
+              text-white shadow-lg
               ${showSpinner ? 'opacity-70 cursor-not-allowed' : ''}
-              ${isRecording ? 'text-white' : 'text-gray-600'} shadow-lg
             `}
           >
             {showSpinner ? (
               <Loader2 className="w-6 h-6 animate-spin" />
-            ) : isRecording ? (
-              <MicOff className="w-6 h-6" />
             ) : (
-              <Mic className="w-6 h-6" />
+              <>
+                {isRecording ? (
+                  <MicOff className="w-6 h-6" />
+                ) : (
+                  <Mic className="w-6 h-6" />
+                )}
+              </>
             )}
           </button>
         )}
         
-        {!isRecording && !hasError && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.2, 0.5] }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute z-0 w-16 h-16 rounded-full bg-green-300"
-          />
-        )}
-        
-        {isRecording && isConnected && (
-          <motion.div
-            initial={{ scale: 1 }}
-            animate={{ scale: [1, 1.5, 1] }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute z-0 w-16 h-16 rounded-full bg-blue-200 opacity-70"
-          />
-        )}
-      </div>
-      
-      {/* Status text */}
-      <div className="mt-2 text-center text-sm">
-        {hasError ? (
-          'Click to retry'
-        ) : showSpinner ? (
-          isSaving ? 'Saving...' : 'Connecting...'
-        ) : isRecording ? (
-          'Recording assessment... Click to stop'
-        ) : (
-          'Click to start recording an assessment'
-        )}
-      </div>
-      
-      {/* Success message */}
-      {saveSuccess && (
-        <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md text-sm flex items-center">
-          <CheckCircle2 className="w-4 h-4 mr-2" />
-          Recording saved successfully! Reloading page...
-        </div>
-      )}
-      
-      {/* Error message */}
-      {error && (
-        <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md text-sm flex items-center">
-          <AlertCircle className="w-4 h-4 mr-2" />
-          {error}
-        </div>
-      )}
-      
-      {/* Transcript display */}
-      {isRecording && !hasError && (
-        <div className="mt-6 p-4 bg-white rounded-lg shadow w-full max-w-lg">
-          {/* Sound wave visualization */}
-          <div className="flex space-x-2 mb-3 justify-center">
-            {[...Array(5)].map((_, i) => (
+        {/* Sound wave visualization */}
+        {isRecording && (
+          <div className="absolute bottom-0 w-64 flex justify-center items-end space-x-1 z-0">
+            {Array.from({ length: 30 }).map((_, index) => (
               <motion.div
-                key={i}
-                animate={generateWaveAnimation(i)}
+                key={index}
+                className="w-1 bg-blue-400 dark:bg-blue-500 rounded-t-full"
+                style={{ height: '15px' }}
+                animate={generateWaveAnimation(index)}
                 transition={{
                   duration: 0.5 + Math.random() * 0.5,
                   repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: i * 0.1
+                  repeatType: 'reverse',
                 }}
-                className={`w-1 rounded-full ${isConnected ? 'bg-blue-500' : 'bg-gray-400'}`}
               />
             ))}
           </div>
-          
-          {/* Transcript text box */}
-          <div className="h-32 overflow-y-auto p-2 bg-gray-50 rounded border text-gray-700 relative">
-            {transcript ? (
-              <p>{transcript}</p>
-            ) : (
-              <span className="text-gray-400">Speak now to record your assessment...</span>
-            )}
-            
+        )}
+      </div>
+      
+      {/* Status and error messages */}
+      <div className="mt-8 text-center">
+        {hasError ? (
+          <div className="flex items-center text-red-500 dark:text-red-400">
+            <AlertCircle className="w-5 h-5 mr-2" />
+            <p className="text-sm">
+              {error || "Couldn't start recording. Please try again."}
+            </p>
+          </div>
+        ) : (
+          <>
             {isConnecting && (
-              <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
-                <div className="flex items-center text-sm text-gray-600">
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Connecting to speech service...
-                </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Connecting to speech service...
+              </p>
+            )}
+            {isRecording && isConnected && (
+              <p className="text-gray-700 dark:text-gray-200 font-medium">
+                Recording... Speak clearly into your microphone
+              </p>
+            )}
+            {saveSuccess && (
+              <div className="flex items-center text-green-600 dark:text-green-400">
+                <CheckCircle2 className="w-5 h-5 mr-2" />
+                <p>Assessment saved successfully!</p>
               </div>
             )}
-          </div>
-          
-          {/* Connection status indicator */}
-          <div className="mt-3 text-xs text-gray-500 flex items-center justify-between">
-            <span>
-              {isConnected ? (
-                <span className="flex items-center text-green-600">
-                  <span className="w-2 h-2 bg-green-600 rounded-full mr-1"></span>
-                  Connected
-                </span>
-              ) : isConnecting ? (
-                <span className="flex items-center">
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  Connecting...
-                </span>
-              ) : (
-                <span className="flex items-center text-red-600">
-                  <span className="w-2 h-2 bg-red-600 rounded-full mr-1"></span>
-                  Disconnected
-                </span>
-              )}
-            </span>
-            
-            <span>
-              {transcript ? `${transcript.length} characters` : 'No text yet'}
-            </span>
+            {!isRecording && !isSaving && !saveSuccess && (
+              <div className="space-y-4">
+                <p className="text-gray-700 dark:text-gray-200 text-lg">
+                  Record your assessment notes
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+                  Click the microphone to start recording. Speak clearly into your microphone to capture your assessment notes.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      
+      {/* Transcript preview (when recording) */}
+      {isRecording && transcript && (
+        <div className="mt-6 w-full max-w-2xl">
+          <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Live Transcript Preview:
+            </h3>
+            <p className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
+              {transcript || "Listening..."}
+            </p>
           </div>
         </div>
       )}
