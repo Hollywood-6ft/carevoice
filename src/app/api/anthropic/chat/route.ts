@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { convertToCoreMessages, streamText } from "ai";
 
 export const runtime = "edge";
@@ -29,9 +29,9 @@ When analyzing documents:
 Present your analysis in a structured format that can be easily incorporated into a care assessment form.`;
     }
 
-    // Use OpenAI instead of Anthropic since we have authentication issues with Anthropic
+    // Use Anthropic Claude instead of OpenAI
     const result = await streamText({
-      model: openai("gpt-4o"),
+      model: anthropic("claude-3-opus-20240229"),
       messages: convertToCoreMessages(messages),
       system: systemPrompt,
       maxTokens: 4000,
