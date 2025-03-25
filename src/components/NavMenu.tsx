@@ -81,57 +81,53 @@ export default function NavMenu() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle - Always visible on desktop */}
-              <div className="hidden md:block">
-                <ThemeToggle />
-              </div>
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               {/* User Profile / Login Section */}
-              <div className="flex items-center">
-                {user ? (
-                  <div className="flex items-center space-x-3">
-                    {/* Notification Bell */}
-                    <button
-                      onClick={handleNotificationClick}
-                      className="relative p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                      aria-label={pendingInvitations.length > 0 ? `${pendingInvitations.length} pending invitations` : "No pending invitations"}
-                    >
-                      <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                      {pendingInvitations.length > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                          {pendingInvitations.length}
-                        </span>
-                      )}
-                    </button>
-                    
-                    {/* User name and sign out button - always visible on desktop */}
-                    <div className="hidden md:flex items-center space-x-3">
-                      <span className="text-base font-medium text-gray-700 dark:text-gray-300">
-                        Hi {getFirstName()}
+              {user && (
+                <div className="flex items-center space-x-3">
+                  {/* Notification Bell */}
+                  <button
+                    onClick={handleNotificationClick}
+                    className="relative p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    aria-label={pendingInvitations.length > 0 ? `${pendingInvitations.length} pending invitations` : "No pending invitations"}
+                  >
+                    <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                    {pendingInvitations.length > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        {pendingInvitations.length}
                       </span>
-                      <button
-                        onClick={() => signOut()}
-                        className="text-base text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                    
-                    {/* Mobile menu button - only visible on mobile */}
+                    )}
+                  </button>
+                  
+                  {/* User name and sign out button - always visible on desktop */}
+                  <div className="hidden md:flex items-center space-x-3">
+                    <span className="text-base font-medium text-gray-700 dark:text-gray-300">
+                      Hi {getFirstName()}
+                    </span>
                     <button
-                      onClick={toggleMobileMenu}
-                      className="md:hidden ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                      aria-label="Toggle mobile menu"
+                      onClick={() => signOut()}
+                      className="text-base text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     >
-                      {showMobileMenu ? (
-                        <X className="h-6 w-6" />
-                      ) : (
-                        <Menu className="h-6 w-6" />
-                      )}
+                      Sign Out
                     </button>
                   </div>
-                ) : null}
-              </div>
+                  
+                  {/* Mobile menu button */}
+                  <button
+                    onClick={toggleMobileMenu}
+                    className="md:hidden ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    aria-label="Toggle mobile menu"
+                  >
+                    {showMobileMenu ? (
+                      <X className="h-6 w-6" />
+                    ) : (
+                      <Menu className="h-6 w-6" />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -164,12 +160,6 @@ export default function NavMenu() {
               >
                 Dashboard
               </Link>
-              
-              {/* Theme toggle for mobile */}
-              <div className="py-2.5 md:hidden">
-                <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</p>
-                <ThemeToggle />
-              </div>
               
               {/* Notifications for mobile */}
               {user && (
