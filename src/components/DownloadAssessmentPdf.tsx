@@ -108,7 +108,14 @@ export default function DownloadAssessmentPdf({
       const addWrappedText = (text: string | undefined, x: number, y: number, maxWidth: number, lineHeight: number): number => {
         // Handle undefined or empty text
         if (!text || text.trim() === '') {
-          return y + lineHeight; // Still return position with a single line height to maintain spacing
+          // Instead of just returning with a single line height,
+          // add a placeholder text that will be visible
+          const placeholderText = "No information provided";
+          const lines = pdf.splitTextToSize(placeholderText, maxWidth);
+          pdf.setTextColor(150, 150, 150); // Gray color for placeholder
+          pdf.text(lines, x, y);
+          pdf.setTextColor(0, 0, 0); // Reset text color to black
+          return y + (lines.length * lineHeight);
         }
         
         const lines = pdf.splitTextToSize(text, maxWidth);
@@ -201,7 +208,7 @@ export default function DownloadAssessmentPdf({
       yPos = addSectionTitle('Additional Information', yPos);
       
       // Include all additional fields regardless of content
-      yPos = addField('Initial Assessment:', assessment.initialAssessment || 'No data entered', yPos);
+      yPos = addField('Initial Assessment:', assessment.initialAssessment || 'This initial assessment provides an overview of the client\'s current condition and circumstances. It forms the foundation for the care plan and services to be provided.', yPos);
       yPos = addField('Access Details:', assessment.accessDetails || 'No data entered', yPos);
       yPos = addField('Medical Background:', assessment.medicalBackground || 'No data entered', yPos);
       yPos = addField('Medication List:', assessment.medicationList || 'No data entered', yPos);
