@@ -81,7 +81,7 @@ export default function NavMenu() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle - Always visible */}
+              {/* Theme Toggle - Always visible on desktop */}
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>
@@ -130,13 +130,7 @@ export default function NavMenu() {
                       )}
                     </button>
                   </div>
-                ) : (
-                  <div className="flex items-center space-x-4">
-                    <div className="hidden md:block">
-                      <ThemeToggle />
-                    </div>
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -172,7 +166,7 @@ export default function NavMenu() {
               </Link>
               
               {/* Theme toggle for mobile */}
-              <div className="py-2.5">
+              <div className="py-2.5 md:hidden">
                 <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</p>
                 <ThemeToggle />
               </div>
