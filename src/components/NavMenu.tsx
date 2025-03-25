@@ -1,36 +1,47 @@
 'use client';
 
-import Link from 'next/link';
-import { useAuth } from '../lib/hooks/useAuth';
-import { useState, useEffect } from 'react';
-import { Bell, Menu, X } from 'lucide-react';
-// Removing the SignInWithGoogle import as we don't want to show it in the navbar
-// import SignInWithGoogle from './SignInWithGoogle';
-import { useInvitations } from '@/lib/contexts/InvitationContext';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import ThemeToggle from './ThemeToggle';
+import Link from 'next/link';
+import { Menu, X, Bell, Sun, Moon } from 'lucide-react';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useInvitations } from '@/lib/contexts/InvitationContext';
+import { useTheme } from '@/lib/contexts/ThemeContext';
+import { auth } from '@/lib/firebase/firebase';
+import { signOut as firebaseSignOut } from 'firebase/auth';
 
 export default function NavMenu() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { user, signOut } = useAuth();
-  const { pendingInvitations, markInvitationsAsRead } = useInvitations();
+  const { user } = useAuth();
+  const { pendingInvitations } = useInvitations();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   
-  // Log pending invitations for debugging
+  // Close mobile menu when route changes
   useEffect(() => {
-    if (user) {
-      console.log('NavMenu: User is logged in:', user.email);
-      console.log('NavMenu: Pending invitations:', pendingInvitations);
-    }
-  }, [user, pendingInvitations]);
-
-  // Lock body scroll when mobile menu is open
+    setShowMobileMenu(false);
+  }, [router]);
+  
+  // Close mobile menu when escape key is pressed
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowMobileMenu(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
+  
+  // Prevent scrolling when mobile menu is open
   useEffect(() => {
     if (showMobileMenu) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
+    
     return () => {
       document.body.style.overflow = '';
     };
@@ -39,61 +50,64 @@ export default function NavMenu() {
   const toggleMobileMenu = () => {
     setShowMobileMenu(!showMobileMenu);
   };
-
-  // Get first name from display name or email
+  
   const getFirstName = () => {
-    if (user?.displayName) {
-      return user.displayName.split(' ')[0];
-    } else if (user?.email) {
-      // If no display name, just return "Guest" instead of showing email
-      return "Guest";
-    }
-    return 'Guest';
+    if (!user || !user.displayName) return 'User';
+    return user.displayName.split(' ')[0];
   };
   
-  // Handle click on notification icon
-  const handleNotificationClick = () => {
-    console.log('Notification clicked, navigating to manage invitations tab');
-    
-    // First fetch the latest invitations to ensure we have up-to-date data
-    if (pendingInvitations.length > 0) {
-      markInvitationsAsRead();
-    }
-    
-    router.push('/?tab=manageInvitations');
-    // Close mobile menu if open
-    if (showMobileMenu) {
-      setShowMobileMenu(false);
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
-
+  
+  const handleNotificationClick = () => {
+    if (pendingInvitations.length > 0) {
+      router.push('/?tab=manageInvitations');
+    }
+  };
+  
   return (
     <>
-      <nav className="shadow-sm z-20 fixed w-full top-0 transition-colors duration-200">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed w-full top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
+              {/* Logo and site name */}
               <div className="flex-shrink-0 flex items-center">
-                <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
-                  CareVoice
+                <Link href="/" className="flex items-center">
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">CareVoice</span>
                 </Link>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
-              <ThemeToggle />
-
               {/* User Profile / Login Section */}
               {user && (
                 <div className="flex items-center space-x-3">
+                  {/* Theme Toggle Button */}
+                  <button
+                    onClick={toggleTheme}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                  >
+                    {theme === 'light' ? (
+                      <Moon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                    ) : (
+                      <Sun className="h-5 w-5 text-gray-300" />
+                    )}
+                  </button>
+                  
                   {/* Notification Bell */}
                   <button
                     onClick={handleNotificationClick}
-                    className="relative p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="relative p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     aria-label={pendingInvitations.length > 0 ? `${pendingInvitations.length} pending invitations` : "No pending invitations"}
                   >
-                    <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                     {pendingInvitations.length > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                         {pendingInvitations.length}
@@ -144,10 +158,10 @@ export default function NavMenu() {
           />
           
           {/* Mobile menu content */}
-          <div className="md:hidden fixed top-16 left-0 right-0 z-30 border-t border-gray-200 dark:border-gray-800 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="md:hidden fixed top-16 left-0 right-0 z-30 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 pt-3 pb-4 space-y-3">
               {user && (
-                <div className="flex items-center pb-2 mb-2 border-b border-gray-200 dark:border-gray-800">
+                <div className="flex items-center pb-2 mb-2 border-b border-gray-200 dark:border-gray-700">
                   <span className="text-base font-medium text-gray-700 dark:text-gray-300">
                     Hi {getFirstName()}
                   </span>
@@ -156,19 +170,37 @@ export default function NavMenu() {
               
               <Link href="/" 
                 onClick={() => setShowMobileMenu(false)}
-                className="block py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                className="block py-2.5 text-base font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 Dashboard
               </Link>
+              
+              {/* Theme toggle for mobile */}
+              <button
+                onClick={toggleTheme}
+                className="flex items-center w-full py-2.5 text-base font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                {theme === 'light' ? (
+                  <>
+                    <Moon className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-300" />
+                    <span>Dark Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="h-5 w-5 mr-2 text-gray-300" />
+                    <span>Light Mode</span>
+                  </>
+                )}
+              </button>
               
               {/* Notifications for mobile */}
               {user && (
                 <>
                   <button
                     onClick={handleNotificationClick}
-                    className="flex items-center w-full py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="flex items-center w-full py-2.5 text-base font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   >
-                    <Bell className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
+                    <Bell className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-300" />
                     <span>
                       {pendingInvitations.length > 0 
                         ? `Pending Invitations (${pendingInvitations.length})` 

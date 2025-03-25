@@ -1,12 +1,16 @@
-import "./globals.css";
-import { AuthProvider } from "@/lib/contexts/AuthContext";
-import { InvitationProvider } from "@/lib/contexts/InvitationContext";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { AuthProvider } from '@/lib/contexts/AuthContext';
+import { InvitationProvider } from '@/lib/contexts/InvitationContext';
+import { ThemeProvider } from '@/lib/contexts/ThemeContext';
 import NavMenu from "@/components/NavMenu";
-import { ThemeProvider } from "next-themes";
 
-export const metadata = {
-  title: "CareVoice Assistant",
-  description: "Your intelligent companion for healthcare documentation and assessments.",
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'CareVoice - Person Centered Care Documentation',
+  description: 'Streamline your care documentation with AI-powered personalization',
 };
 
 export default function RootLayout({
@@ -15,22 +19,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen">
-        <ThemeProvider 
-          attribute="class" 
-          defaultTheme="light"
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-            <InvitationProvider>
+    <html lang="en" className="h-full" suppressHydrationWarning>
+      <body className={`${inter.className} h-full transition-colors duration-200 dark:bg-gray-900 dark:text-gray-100`}>
+        <AuthProvider>
+          <InvitationProvider>
+            <ThemeProvider>
               <NavMenu />
               <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
                 {children}
               </div>
-            </InvitationProvider>
-          </AuthProvider>
-        </ThemeProvider>
+            </ThemeProvider>
+          </InvitationProvider>
+        </AuthProvider>
       </body>
     </html>
   );
