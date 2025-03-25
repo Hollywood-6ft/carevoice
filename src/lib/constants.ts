@@ -1,0 +1,23 @@
+// Ramp fields with titles
+export const defaultRampFields = [
+  { id: 'ramp1', title: 'Ramp 1: Respiratory Care' },
+  { id: 'ramp2', title: 'Ramp 2: Psychological' },
+  { id: 'ramp3', title: 'Ramp 3: Nutrition' },
+  { id: 'ramp4', title: 'Ramp 4: Skin integrity' },
+  { id: 'ramp5', title: 'Ramp 5: Mobility' },
+  { id: 'ramp6', title: 'Ramp 6: Personal hygiene' },
+  { id: 'ramp7', title: 'Ramp 7: Elimination' },
+  { id: 'ramp8', title: 'Ramp 8: Sleeping' },
+  { id: 'ramp9', title: 'Ramp 9: End of life care' },
+  { id: 'ramp10', title: 'Ramp 10: Sexuality' },
+  { id: 'ramp11', title: 'Ramp 11: Living environment' },
+  { id: 'ramp12', title: 'Ramp 12: Activities of daily living' },
+  { id: 'ramp13', title: 'Ramp 13: Medication' },
+  { id: 'ramp14', title: 'Ramp 14: Communication' },
+  { id: 'ramp15', title: 'Ramp 15: Moving and handling' },
+  { id: 'ramp16', title: 'Ramp 16: Falls and Safety' },
+  { id: 'ramp17', title: 'Ramp 17: COSSH' },
+  { id: 'ramp18', title: 'Ramp 18: Money Management' },
+  { id: 'ramp19', title: 'Ramp 19: Social and Spiritual' },
+  { id: 'ramp20', title: 'Ramp 20: Challenging Behaviour' },
+]; 
